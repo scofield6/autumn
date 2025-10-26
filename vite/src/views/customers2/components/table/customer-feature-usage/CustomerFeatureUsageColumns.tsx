@@ -5,6 +5,7 @@ import {
 } from "@autumn/shared";
 import type { Row } from "@tanstack/react-table";
 import { formatUnixToDateTime } from "@/utils/formatUtils/formatDateUtils";
+import { getFeatureIcon } from "@/views/products/features/utils/getFeatureIcon";
 
 export const CustomerFeatureUsageColumns = [
 	{
@@ -57,12 +58,8 @@ export const CustomerFeatureUsageColumns = [
 		accessorKey: "configuration",
 		cell: ({ row }: { row: Row<FullCusEntWithFullCusProduct> }) => {
 			const cusEnt = row.original;
-			const { date, time } = formatUnixToDateTime(cusEnt.next_reset_at);
-			return (
-				<div className="text-xs text-t3">
-					{date} {time}
-				</div>
-			);
+			const ent = cusEnt.entitlement;
+			return <div>{getFeatureIcon({ feature: ent.feature })}</div>;
 		},
 	},
 ];

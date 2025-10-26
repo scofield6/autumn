@@ -1,3 +1,4 @@
+import type { FullCusProduct, FullCustomerEntitlement } from "@autumn/shared";
 import {
 	getCoreRowModel,
 	getFilteredRowModel,
@@ -20,8 +21,8 @@ export function CustomerFeatureUsageTable() {
 
 	const cusEnts = useMemo(
 		() =>
-			customer?.customer_products.flatMap((cp: any) =>
-				cp.customer_entitlements.map((e: any) => ({
+			customer?.customer_products.flatMap((cp: FullCusProduct) =>
+				cp.customer_entitlements.map((e: FullCustomerEntitlement) => ({
 					...e,
 					customer_product: cp,
 				})),

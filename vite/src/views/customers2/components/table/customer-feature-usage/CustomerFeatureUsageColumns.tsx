@@ -4,9 +4,7 @@ import {
 	type FullCusEntWithFullCusProduct,
 } from "@autumn/shared";
 import type { Row } from "@tanstack/react-table";
-import { Badge } from "@/components/ui/badge";
 import { formatUnixToDateTime } from "@/utils/formatUtils/formatDateUtils";
-import { CusEntBalance } from "./CustomerFeatureBalance";
 
 export const CustomerFeatureUsageColumns = [
 	{

@@ -2,12 +2,10 @@
 
 import type { Event } from "@autumn/shared";
 import { useMemo } from "react";
-import { Bar, BarChart, CartesianGrid, XAxis } from "recharts";
+import { Bar, BarChart, CartesianGrid, XAxis, YAxis } from "recharts";
 import {
 	type ChartConfig,
 	ChartContainer,
-	ChartLegend,
-	ChartLegendContent,
 	ChartTooltip,
 	ChartTooltipContent,
 } from "@/components/ui/chart";
@@ -19,14 +17,13 @@ export function CustomerUsageAnalyticsChart({
 	events: Event[];
 	daysToShow?: number;
 }) {
-
-	const { chartData, chartConfig, eventNames } = useMemo(() => {
+	const { chartData, chartConfig, eventNames, maxValue } = useMemo(() => {
 		console.log("Chart events:", events);
 
 		// Get unique event names (even if no events, we need this for config)
 		const uniqueEventNames =
 			events && events.length > 0
-				? Array.from(new Set(events.map((e: any) => e.event_name)))
+				? Array.from(new Set(events.map((e: Event) => e.event_name)))
 				: [];
 
 		// Create chart config
@@ -53,7 +50,7 @@ export function CustomerUsageAnalyticsChart({
 
 		// Group events by day
 		if (events && events.length > 0) {
-			events.forEach((event: any) => {
+			events.forEach((event: Event) => {
 				// Handle both Unix timestamp (number) and ISO string formats
 				const date =
 					typeof event.timestamp === "number"
@@ -78,29 +75,52 @@ export function CustomerUsageAnalyticsChart({
 			...counts,
 		}));
 
-		console.log("Chart data:", data);
-		console.log("Chart config:", config);
-		console.log("Event names:", uniqueEventNames);
+		// Calculate max stacked value
+		const max = Math.max(
+			...data.map((day) =>
+				uniqueEventNames.reduce(
+					(sum, eventName) => sum + (day[eventName] || 0),
+					0,
+				),
+			),
+			0,
+		);
 
 		return {
 			chartData: data,
 			chartConfig: config,
 			eventNames: uniqueEventNames,
+			maxValue: max,
 		};
 	}, [events, daysToShow]);
 
 	return (
-		<ChartContainer config={chartConfig} className="max-h-[300px]">
-			<BarChart accessibilityLayer data={chartData} barSize={60} maxBarSize={80}>
-				<CartesianGrid vertical={false} />
+		<ChartContainer
+			config={chartConfig}
+			className="max-h-[300px] border pl-0 mb-4 p-2 rounded-2xl"
+		>
+			<BarChart
+				accessibilityLayer
+				data={chartData}
+				barSize={60}
+				maxBarSize={80}
+				className="[&_.recharts-cartesian-grid-bg]:fill-white [&_.recharts-cartesian-grid-bg]:stroke-border [&_.recharts-cartesian-grid-bg]:stroke-1 [&_.recharts-cartesian-grid-bg]:[rx:8px]"
+			>
+				<CartesianGrid vertical={false} fill="white" />
 				<XAxis
 					dataKey="date"
 					tickLine={false}
 					tickMargin={10}
 					axisLine={false}
 				/>
-				<ChartTooltip content={<ChartTooltipContent hideLabel />} />
-				<ChartLegend content={<ChartLegendContent />} />
+				<YAxis
+					domain={[0, Math.round(maxValue * 1.2)]}
+					tickCount={5}
+					tickLine={false}
+					axisLine={false}
+					width={16}
+				/>
+				<ChartTooltip content={<ChartTooltipContent />} />
 				{eventNames.map((eventName: string, index: number) => (
 					<Bar
 						key={eventName}

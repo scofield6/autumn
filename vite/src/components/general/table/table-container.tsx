@@ -1,3 +1,13 @@
-export function TableContainer({ children }: { children: React.ReactNode }) {
-	return <div className="flex flex-col gap-4 rounded-xl">{children}</div>;
+import { cn } from "@/lib/utils";
+
+export function TableContainer({
+	className,
+	children,
+}: {
+	className?: string;
+	children: React.ReactNode;
+}) {
+	return (
+		<div className={cn("flex flex-col rounded-xl", className)}>{children}</div>
+	);
 }

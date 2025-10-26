@@ -3,21 +3,19 @@ import {
 	getFilteredRowModel,
 	useReactTable,
 } from "@tanstack/react-table";
-import { parseAsInteger, useQueryState } from "nuqs";
+import {
+	parseAsArrayOf,
+	parseAsInteger,
+	parseAsString,
+	useQueryState,
+} from "nuqs";
 import { useMemo } from "react";
 import { Table } from "@/components/general/table";
-import {
-	Select,
-	SelectContent,
-	SelectItem,
-	SelectTrigger,
-	SelectValue,
-} from "@/components/ui/select";
 import { useCusEventsQuery } from "@/views/customers/customer/hooks/useCusEventsQuery";
 import { CustomerUsageAnalyticsChart } from "./CustomerUsageAnalyticsChart";
 import { CustomerUsageAnalyticsColumns } from "./CustomerUsageAnalyticsColumns";
-
-const DAY_OPTIONS = [7, 14, 21, 28];
+import { CustomerUsageAnalyticsSelectDays } from "./CustomerUsageAnalyticsSelectDays";
+import { CustomerUsageAnalyticsSelectFeatures } from "./CustomerUsageAnalyticsSelectFeatures";
 
 export function CustomerUsageAnalyticsTable() {
 	const { events, isLoading } = useCusEventsQuery();
@@ -27,10 +25,17 @@ export function CustomerUsageAnalyticsTable() {
 		parseAsInteger.withDefault(7),
 	);
 
-	const filteredEvents = useMemo(() => {
-		console.log("Raw events:", events);
-		console.log("Selected days:", selectedDays);
+	const [selectedFeatures, setSelectedFeatures] = useQueryState(
+		"analyticsFeatures",
+		parseAsArrayOf(parseAsString).withDefault([]),
+	);
 
+	const availableFeatures = useMemo(() => {
+		if (!events || events.length === 0) return [];
+		return Array.from(new Set(events.map((e: any) => e.event_name)));
+	}, [events]);
+
+	const filteredEvents = useMemo(() => {
 		if (!events || !selectedDays) return events ?? [];
 
 		const cutoffDate = new Date();
@@ -43,14 +48,19 @@ export function CustomerUsageAnalyticsTable() {
 				typeof event.timestamp === "number"
 					? event.timestamp * 1000
 					: new Date(event.timestamp).getTime();
-			return eventTime >= cutoffTime;
+
+			const withinTimeRange = eventTime >= cutoffTime;
+
+			// Filter by selected features if any are selected
+			const matchesFeature =
+				selectedFeatures.length === 0 ||
+				selectedFeatures.includes(event.event_name);
+
+			return withinTimeRange && matchesFeature;
 		});
 
-		console.log("Filtered events:", filtered);
-		console.log("Cutoff date:", cutoffDate);
-
 		return filtered;
-	}, [events, selectedDays]);
+	}, [events, selectedDays, selectedFeatures]);
 
 	const enableSorting = false;
 	const table = useReactTable({
@@ -74,21 +84,15 @@ export function CustomerUsageAnalyticsTable() {
 				<Table.Toolbar>
 					<Table.Heading>Usage Analytics</Table.Heading>
 					<Table.Actions>
-						<Select
-							value={selectedDays?.toString()}
-							onValueChange={(value) => setSelectedDays(Number.parseInt(value))}
-						>
-							<SelectTrigger className="w-[140px] h-7.5 text-sm">
-								<SelectValue placeholder="Select days" />
-							</SelectTrigger>
-							<SelectContent>
-								{DAY_OPTIONS.map((days) => (
-									<SelectItem key={days} value={days.toString()}>
-										Last {days} days
-									</SelectItem>
-								))}
-							</SelectContent>
-						</Select>
+						<CustomerUsageAnalyticsSelectFeatures
+							availableFeatures={availableFeatures}
+							selectedFeatures={selectedFeatures}
+							setSelectedFeatures={setSelectedFeatures}
+						/>
+						<CustomerUsageAnalyticsSelectDays
+							selectedDays={selectedDays}
+							setSelectedDays={setSelectedDays}
+						/>
 					</Table.Actions>
 				</Table.Toolbar>
 				<CustomerUsageAnalyticsChart

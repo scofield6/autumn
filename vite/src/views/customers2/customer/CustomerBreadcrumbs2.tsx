@@ -1,3 +1,4 @@
+import type { Entity } from "@autumn/shared";
 import { useLocation, useNavigate } from "react-router";
 import { AdminHover } from "@/components/general/AdminHover";
 import {
@@ -20,7 +21,7 @@ export const CustomerBreadcrumbs = () => {
 	const { customer } = useCusQuery();
 	const { entityId, setEntityId } = useCustomerContext();
 
-	const entity = customer.entities.find((e: any) => e.id === entityId);
+	const entity = customer.entities.find((e: Entity) => e.id === entityId);
 
 	return (
 		<Breadcrumb className="text-t3 flex justify-start ">
@@ -43,7 +44,7 @@ export const CustomerBreadcrumbs = () => {
 								{
 									key: "Entities",
 									value: (customer.entities || [])
-										.map((e: any) => e.id)
+										.map((e: Entity) => e.id)
 										.join(", "),
 								},
 							]}

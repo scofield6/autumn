@@ -6,6 +6,7 @@ import { TableContainer } from "./table-container";
 import { TableContent } from "./table-content";
 import { TableHeader } from "./table-header";
 import { TableHeading } from "./table-heading";
+import { TablePagination } from "./table-pagination";
 import { TableProvider } from "./table-provider";
 import { TableToolbar } from "./table-toolbar";
 
@@ -18,4 +19,5 @@ export const Table = {
 	Heading: TableHeading,
 	Body: TableBody,
 	Container: TableContainer,
+	Pagination: TablePagination,
 };

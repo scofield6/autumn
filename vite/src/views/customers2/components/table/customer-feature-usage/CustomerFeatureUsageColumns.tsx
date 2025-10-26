@@ -4,8 +4,26 @@ import {
 	type FullCusEntWithFullCusProduct,
 } from "@autumn/shared";
 import type { Row } from "@tanstack/react-table";
+import {
+	Tooltip,
+	TooltipContent,
+	TooltipTrigger,
+} from "@/components/v2/tooltips/Tooltip";
 import { formatUnixToDateTime } from "@/utils/formatUtils/formatDateUtils";
 import { getFeatureIcon } from "@/views/products/features/utils/getFeatureIcon";
+
+const getFeatureTypeLabel = (type: FeatureType): string => {
+	switch (type) {
+		case FeatureType.Boolean:
+			return "Boolean";
+		case FeatureType.Metered:
+			return "Metered";
+		case FeatureType.CreditSystem:
+			return "Credit System";
+		default:
+			return "Feature";
+	}
+};
 
 export const CustomerFeatureUsageColumns = [
 	{
@@ -22,7 +40,7 @@ export const CustomerFeatureUsageColumns = [
 			const ent = cusEnt.entitlement;
 
 			if (ent.feature.type === FeatureType.Boolean) {
-				return <div className="text-t3">N/A</div>;
+				return <></>;
 			}
 
 			if (ent.allowance_type === AllowanceType.Unlimited) {
@@ -59,7 +77,20 @@ export const CustomerFeatureUsageColumns = [
 		cell: ({ row }: { row: Row<FullCusEntWithFullCusProduct> }) => {
 			const cusEnt = row.original;
 			const ent = cusEnt.entitlement;
-			return <div>{getFeatureIcon({ feature: ent.feature })}</div>;
+			return (
+				<div>
+					<Tooltip>
+						<TooltipTrigger asChild>
+							<span className="inline-flex">
+								{getFeatureIcon({ feature: ent.feature })}
+							</span>
+						</TooltipTrigger>
+						<TooltipContent>
+							{getFeatureTypeLabel(ent.feature.type)}
+						</TooltipContent>
+					</Tooltip>
+				</div>
+			);
 		},
 	},
 ];

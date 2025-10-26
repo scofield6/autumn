@@ -1,4 +1,5 @@
 import type { FullCusProduct, FullCustomerEntitlement } from "@autumn/shared";
+import { FeatureType } from "@autumn/shared";
 import {
 	getCoreRowModel,
 	getFilteredRowModel,
@@ -30,9 +31,33 @@ export function CustomerFeatureUsageTable() {
 		[customer],
 	);
 
+	const nonBooleanEnts = useMemo(
+		() =>
+			cusEnts.filter(
+				(ent) => ent.entitlement.feature.type !== FeatureType.Boolean,
+			),
+		[cusEnts],
+	);
+
+	const booleanEnts = useMemo(
+		() =>
+			cusEnts.filter(
+				(ent) => ent.entitlement.feature.type === FeatureType.Boolean,
+			),
+		[cusEnts],
+	);
+
 	const enableSorting = false;
 	const table = useReactTable({
-		data: cusEnts,
+		data: nonBooleanEnts,
+		columns: CustomerFeatureUsageColumns,
+		getCoreRowModel: getCoreRowModel(),
+		getFilteredRowModel: getFilteredRowModel(),
+		enableSorting,
+	});
+
+	const booleanTable = useReactTable({
+		data: booleanEnts,
 		columns: CustomerFeatureUsageColumns,
 		getCoreRowModel: getCoreRowModel(),
 		getFilteredRowModel: getFilteredRowModel(),
@@ -40,29 +65,47 @@ export function CustomerFeatureUsageTable() {
 	});
 
 	return (
-		<Table.Provider
-			config={{
-				table,
-				numberOfColumns: CustomerFeatureUsageColumns.length,
-				enableSorting,
-				isLoading,
-			}}
-		>
-			<Table.Container>
-				<Table.Toolbar>
-					<Table.Heading>Feature Usage</Table.Heading>
-					<Table.Actions>
-						<ShowExpiredActionButton
-							showExpired={showExpired}
-							setShowExpired={setShowExpired}
-						/>
-					</Table.Actions>
-				</Table.Toolbar>
-				<Table.Content>
-					<Table.Header />
-					<Table.Body />
-				</Table.Content>
-			</Table.Container>
-		</Table.Provider>
+		<>
+			<Table.Provider
+				config={{
+					table,
+					numberOfColumns: CustomerFeatureUsageColumns.length,
+					enableSorting,
+					isLoading,
+				}}
+			>
+				<Table.Container>
+					<Table.Toolbar>
+						<Table.Heading>Feature Usage</Table.Heading>
+						<Table.Actions>
+							<ShowExpiredActionButton
+								showExpired={showExpired}
+								setShowExpired={setShowExpired}
+							/>
+						</Table.Actions>
+					</Table.Toolbar>
+					<Table.Content>
+						<Table.Header />
+						<Table.Body />
+					</Table.Content>
+				</Table.Container>
+			</Table.Provider>
+			{booleanEnts.length > 0 && (
+				<Table.Provider
+					config={{
+						table: booleanTable,
+						numberOfColumns: CustomerFeatureUsageColumns.length,
+						enableSorting,
+						isLoading,
+					}}
+				>
+					<Table.Container className="pt-0!">
+						<Table.Content>
+							<Table.Body />
+						</Table.Content>
+					</Table.Container>
+				</Table.Provider>
+			)}
+		</>
 	);
 }

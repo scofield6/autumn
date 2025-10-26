@@ -1,4 +1,4 @@
-import { flexRender } from "@tanstack/react-table";
+import { type Row, flexRender } from "@tanstack/react-table";
 import { EllipsisVertical } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -16,9 +16,10 @@ import { cn } from "@/lib/utils";
 import SmallSpinner from "../SmallSpinner";
 import { useTableContext } from "./table-context";
 
-export const TableRowDropdownMenu = () => {
-	const { dropdownMenuItems } = useTableContext();
+export const TableRowDropdownMenu = <T,>({ row }: { row: Row<T> }) => {
+	const { dropdownMenuItems } = useTableContext<T>();
 	if (!dropdownMenuItems) return null;
+	const items = dropdownMenuItems(row);
 	return (
 		<TableCell className="p-1 w-[50px]">
 			<DropdownMenu>
@@ -28,7 +29,7 @@ export const TableRowDropdownMenu = () => {
 					</Button>
 				</DropdownMenuTrigger>
 				<DropdownMenuContent>
-					{dropdownMenuItems.map((item) => item)}
+					{items.map((item) => item)}
 				</DropdownMenuContent>
 			</DropdownMenu>
 		</TableCell>
@@ -94,7 +95,7 @@ export function TableBody() {
 							{flexRender(cell.column.columnDef.cell, cell.getContext())}
 						</TableCell>
 					))}
-					<TableRowDropdownMenu />
+					<TableRowDropdownMenu row={row} />
 				</TableRow>
 			))}
 		</ShadcnTableBody>

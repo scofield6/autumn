@@ -1,4 +1,8 @@
-import type { FullCusProduct, FullCustomerEntitlement } from "@autumn/shared";
+import type {
+	FullCusEntWithFullCusProduct,
+	FullCusProduct,
+	FullCustomerEntitlement,
+} from "@autumn/shared";
 import { FeatureType } from "@autumn/shared";
 import {
 	type ExpandedState,
@@ -43,13 +47,18 @@ export function CustomerFeatureUsageTable() {
 	const nonBooleanEnts = useMemo(() => {
 		// Create a map of feature id to customer entitlements for quick lookup
 		const featureIdToCusEnt = new Map(
-			cusEnts.map((ent) => [ent.entitlement.feature.id, ent]),
+			cusEnts.map((ent: FullCusEntWithFullCusProduct) => [
+				ent.entitlement.feature.id,
+				ent,
+			]),
 		);
 
 		return cusEnts
-			.filter((ent) => ent.entitlement.feature.type !== FeatureType.Boolean)
-			.map((ent) => {
-				// Add subRows for Credit System features
+			.filter(
+				(ent: FullCusEntWithFullCusProduct) =>
+					ent.entitlement.feature.type !== FeatureType.Boolean,
+			)
+			.map((ent: FullCusEntWithFullCusProduct) => {
 				if (ent.entitlement.feature.type === FeatureType.CreditSystem) {
 					const creditSchema = ent.entitlement.feature.config?.schema || [];
 					const subRows = creditSchema.map((schemaItem: any) => {
@@ -83,7 +92,8 @@ export function CustomerFeatureUsageTable() {
 	const booleanEnts = useMemo(
 		() =>
 			cusEnts.filter(
-				(ent) => ent.entitlement.feature.type === FeatureType.Boolean,
+				(ent: FullCusEntWithFullCusProduct) =>
+					ent.entitlement.feature.type === FeatureType.Boolean,
 			),
 		[cusEnts],
 	);
@@ -95,7 +105,7 @@ export function CustomerFeatureUsageTable() {
 		getCoreRowModel: getCoreRowModel(),
 		getFilteredRowModel: getFilteredRowModel(),
 		getExpandedRowModel: getExpandedRowModel(),
-		getSubRows: (row) => row.subRows,
+		getSubRows: (row: FullCusEntWithFullCusProduct) => row.subRows,
 		getRowCanExpand: (row) =>
 			row.original.entitlement?.feature?.type === FeatureType.CreditSystem,
 		enableSorting,

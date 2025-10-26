@@ -1,4 +1,4 @@
-import type { Table as TanstackTable } from "@tanstack/react-table";
+import type { Row, Table as TanstackTable } from "@tanstack/react-table";
 import { createContext, useContext } from "react";
 
 export interface TableProps<T> {
@@ -7,7 +7,7 @@ export interface TableProps<T> {
 	isLoading: boolean;
 	enableSelection?: boolean;
 	enableSorting?: boolean;
-	dropdownMenuItems?: React.ReactNode[];
+	dropdownMenuItems?: (row: Row<T>) => React.ReactNode[];
 }
 
 //biome-ignore lint/suspicious/noExplicitAny: type could be any here

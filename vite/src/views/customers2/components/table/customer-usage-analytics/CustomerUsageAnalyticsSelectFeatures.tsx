@@ -25,7 +25,6 @@ export function CustomerUsageAnalyticsSelectFeatures({
 	};
 
 	const displayText =
-		selectedFeatures.length === 0 ||
 		selectedFeatures.length === availableFeatures.length
 			? "All features"
 			: selectedFeatures.length === 1
@@ -45,26 +44,28 @@ export function CustomerUsageAnalyticsSelectFeatures({
 				</Button>
 			</PopoverTrigger>
 			<PopoverContent className="w-[180px] p-1" align="end">
-				{availableFeatures.map((feature) => (
-					<div
-						key={feature}
-						className={cn(
-							"relative flex cursor-pointer select-none items-center rounded-sm px-2 py-1.5 text-sm outline-none transition-colors hover:bg-accent hover:text-accent-foreground",
-							selectedFeatures.includes(feature) && "bg-accent/50",
-						)}
-						onClick={() => toggleFeature(feature)}
-					>
-						<Check
+				{availableFeatures.map((feature) => {
+					const isSelected =
+						selectedFeatures.includes(feature);
+					return (
+						<div
+							key={feature}
 							className={cn(
-								"mr-2 h-4 w-4",
-								selectedFeatures.includes(feature)
-									? "opacity-100"
-									: "opacity-0",
+								"relative flex cursor-pointer select-none items-center rounded-sm px-2 py-1.5 text-sm outline-none transition-colors hover:bg-accent hover:text-accent-foreground",
+								isSelected && "bg-accent/50",
 							)}
-						/>
-						<span>{feature}</span>
-					</div>
-				))}
+							onClick={() => toggleFeature(feature)}
+						>
+							<Check
+								className={cn(
+									"mr-2 h-4 w-4",
+									isSelected ? "opacity-100" : "opacity-0",
+								)}
+							/>
+							<span>{feature}</span>
+						</div>
+					);
+				})}
 			</PopoverContent>
 		</Popover>
 	);

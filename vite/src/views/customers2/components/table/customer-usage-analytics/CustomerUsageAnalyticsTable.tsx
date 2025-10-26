@@ -9,11 +9,12 @@ import {
 	parseAsString,
 	useQueryState,
 } from "nuqs";
-import { useMemo } from "react";
+import { useEffect, useMemo } from "react";
 import { Table } from "@/components/general/table";
 import { useCusEventsQuery } from "@/views/customers/customer/hooks/useCusEventsQuery";
 import { CustomerUsageAnalyticsChart } from "./CustomerUsageAnalyticsChart";
 import { CustomerUsageAnalyticsColumns } from "./CustomerUsageAnalyticsColumns";
+import { CustomerUsageAnalyticsFullButton } from "./CustomerUsageAnalyticsFullButton";
 import { CustomerUsageAnalyticsSelectDays } from "./CustomerUsageAnalyticsSelectDays";
 import { CustomerUsageAnalyticsSelectFeatures } from "./CustomerUsageAnalyticsSelectFeatures";
 
@@ -35,6 +36,17 @@ export function CustomerUsageAnalyticsTable() {
 		return Array.from(new Set(events.map((e: any) => e.event_name)));
 	}, [events]);
 
+	// Initialize selectedFeatures with all features on first load
+	useEffect(() => {
+		if (
+			availableFeatures.length > 0 &&
+			selectedFeatures &&
+			selectedFeatures.length === 0
+		) {
+			setSelectedFeatures(availableFeatures);
+		}
+	}, [availableFeatures, selectedFeatures, setSelectedFeatures]);
+
 	const filteredEvents = useMemo(() => {
 		if (!events || !selectedDays) return events ?? [];
 
@@ -43,18 +55,14 @@ export function CustomerUsageAnalyticsTable() {
 		const cutoffTime = cutoffDate.getTime();
 
 		const filtered = events.filter((event: any) => {
-			// Handle both Unix timestamp (number) and ISO string formats
 			const eventTime =
 				typeof event.timestamp === "number"
 					? event.timestamp * 1000
 					: new Date(event.timestamp).getTime();
 
 			const withinTimeRange = eventTime >= cutoffTime;
-
-			// Filter by selected features if any are selected
 			const matchesFeature =
-				selectedFeatures.length === 0 ||
-				selectedFeatures.includes(event.event_name);
+				selectedFeatures && selectedFeatures.includes(event.event_name);
 
 			return withinTimeRange && matchesFeature;
 		});
@@ -85,7 +93,7 @@ export function CustomerUsageAnalyticsTable() {
 					<Table.Heading>Usage Analytics</Table.Heading>
 					<Table.Actions>
 						<CustomerUsageAnalyticsSelectFeatures
-							availableFeatures={availableFeatures}
+							availableFeatures={availableFeatures as string[]}
 							selectedFeatures={selectedFeatures}
 							setSelectedFeatures={setSelectedFeatures}
 						/>
@@ -93,6 +101,7 @@ export function CustomerUsageAnalyticsTable() {
 							selectedDays={selectedDays}
 							setSelectedDays={setSelectedDays}
 						/>
+						<CustomerUsageAnalyticsFullButton />
 					</Table.Actions>
 				</Table.Toolbar>
 				<CustomerUsageAnalyticsChart

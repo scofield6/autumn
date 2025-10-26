@@ -9,8 +9,8 @@ import {
 } from "@/components/ui/breadcrumb";
 import { useEnv } from "@/utils/envUtils";
 import { navigateTo } from "@/utils/genUtils";
-import { useCustomerContext } from "../../CustomerContext";
-import { useCusQuery } from "../../hooks/useCusQuery";
+import { useCusQuery } from "@/views/customers/customer/hooks/useCusQuery";
+import { useCustomerContext } from "./CustomerContext";
 
 export const CustomerBreadcrumbs = () => {
 	const env = useEnv();
@@ -23,7 +23,7 @@ export const CustomerBreadcrumbs = () => {
 	const entity = customer.entities.find((e: any) => e.id === entityId);
 
 	return (
-		<Breadcrumb className="text-t3 pt-6 pl-10 flex justify-start ">
+		<Breadcrumb className="text-t3 flex justify-start ">
 			<BreadcrumbList className="text-t3 text-xs">
 				<BreadcrumbItem>
 					<BreadcrumbLink

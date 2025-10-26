@@ -23,6 +23,8 @@ export const useTab = () => {
 		pathname.startsWith("/sandbox/products")
 	) {
 		return "products";
+	} else if (pathname.startsWith("/sandbox/customers-v2/charlie")) {
+		return "customers-v2/charlie";
 	} else if (
 		pathname.startsWith("/customers") ||
 		pathname.startsWith("/sandbox/customers")

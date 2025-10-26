@@ -12,13 +12,13 @@ import { useLocalStorage } from "@/hooks/common/useLocalStorage";
 import { useOrg } from "@/hooks/common/useOrg";
 import { cn } from "@/lib/utils";
 import { useEnv } from "@/utils/envUtils";
+import { CollapsibleNavGroup } from "./CollapsibleNavGroup";
 import { DeployToProdButton } from "./components/deploy-button/DeployToProdButton";
 import { OrgDropdown } from "./components/OrgDropdown";
 import { EnvDropdown } from "./EnvDropdown";
 import { NavButton } from "./NavButton";
 import SidebarBottom from "./SidebarBottom";
 import { SidebarContext } from "./SidebarContext";
-import { CollapsibleNavGroup } from "./CollapsibleNavGroup";
 
 export const MainSidebar = () => {
 	const env = useEnv();
@@ -101,6 +101,12 @@ export const MainSidebar = () => {
 							value="customers"
 							icon={<CircleUserRound size={14} />}
 							title="Customers"
+							env={env}
+						/>
+						<NavButton
+							value="customers-v2/charlie"
+							icon={<CircleUserRound size={14} />}
+							title="Customers V2"
 							env={env}
 						/>
 						<NavButton

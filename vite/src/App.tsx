@@ -16,6 +16,8 @@ import CustomersPage from "./views/customers/CustomersPage";
 import { AnalyticsView } from "./views/customers/customer/analytics/AnalyticsView";
 import CustomerView from "./views/customers/customer/CustomerView";
 import CustomerProductView from "./views/customers/customer/product/CustomerProductView";
+import { CustomersPage2 } from "./views/customers2/CustomersPage2";
+import CustomerView2 from "./views/customers2/customer/CustomerView2";
 import { DefaultView } from "./views/DefaultView";
 import DevScreen from "./views/developer/DevView";
 import { CloseScreen } from "./views/general/CloseScreen";
@@ -97,6 +99,17 @@ export default function App() {
 					<Route
 						path="/sandbox/customers/:customer_id/:product_id"
 						element={<CustomerProductView />}
+					/>
+
+					<Route path="/customers-v2" element={<CustomersPage />} />
+					<Route path="/sandbox/customers-v2" element={<CustomersPage />} />
+					<Route
+						path="/customers-v2/:customer_id"
+						element={<CustomerView2 />}
+					/>
+					<Route
+						path="/sandbox/customers-v2/:customer_id"
+						element={<CustomerView2 />}
 					/>
 					<Route path="/dev" element={<DevScreen />} />
 					<Route path="/sandbox/dev" element={<DevScreen />} />

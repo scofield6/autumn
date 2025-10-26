@@ -1,12 +1,5 @@
-import { type Row, flexRender } from "@tanstack/react-table";
-import { EllipsisVertical } from "lucide-react";
-import { Button } from "@/components/ui/button";
+import { flexRender } from "@tanstack/react-table";
 import { Checkbox } from "@/components/ui/checkbox";
-import {
-	DropdownMenu,
-	DropdownMenuContent,
-	DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
 import {
 	TableBody as ShadcnTableBody,
 	TableCell,
@@ -16,38 +9,14 @@ import { cn } from "@/lib/utils";
 import SmallSpinner from "../SmallSpinner";
 import { useTableContext } from "./table-context";
 
-export const TableRowDropdownMenu = <T,>({ row }: { row: Row<T> }) => {
-	const { dropdownMenuItems } = useTableContext<T>();
-	if (!dropdownMenuItems) return null;
-	const items = dropdownMenuItems(row);
-	return (
-		<TableCell className="p-1 w-[50px]">
-			<DropdownMenu>
-				<DropdownMenuTrigger asChild>
-					<Button variant="ghost" size="icon" className="p-0 size-4">
-						<EllipsisVertical size={16} />
-					</Button>
-				</DropdownMenuTrigger>
-				<DropdownMenuContent>
-					{items.map((item) => item)}
-				</DropdownMenuContent>
-			</DropdownMenu>
-		</TableCell>
-	);
-};
-
 export function TableBody() {
 	const {
 		table,
 		numberOfColumns,
 		enableSelection,
-		dropdownMenuItems,
 		isLoading,
 	} = useTableContext();
 	const rows = table.getRowModel().rows;
-	const hasDropdownMenuItems = !!dropdownMenuItems;
-	const numberOfColumnsWithDropdownMenuItems =
-		numberOfColumns + (hasDropdownMenuItems ? 1 : 0);
 
 	if (!rows.length) {
 		return (
@@ -55,7 +24,7 @@ export function TableBody() {
 				<TableRow>
 					<TableCell
 						className="h-24 text-center"
-						colSpan={numberOfColumnsWithDropdownMenuItems}
+						colSpan={numberOfColumns}
 					>
 						{isLoading ? (
 							<div className="flex justify-center items-center">
@@ -95,7 +64,6 @@ export function TableBody() {
 							{flexRender(cell.column.columnDef.cell, cell.getContext())}
 						</TableCell>
 					))}
-					<TableRowDropdownMenu row={row} />
 				</TableRow>
 			))}
 		</ShadcnTableBody>

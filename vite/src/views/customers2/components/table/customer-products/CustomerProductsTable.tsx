@@ -1,15 +1,12 @@
 import type { FullCusProduct } from "@autumn/shared";
-import type { Row } from "@tanstack/react-table";
 import {
 	getCoreRowModel,
 	getFilteredRowModel,
 	useReactTable,
 } from "@tanstack/react-table";
-import { Delete } from "lucide-react";
 import { parseAsBoolean, useQueryState } from "nuqs";
 import { useMemo, useState } from "react";
 import { Table } from "@/components/general/table";
-import { DropdownMenuItem } from "@/components/ui/dropdown-menu";
 import { useCusQuery } from "@/views/customers/customer/hooks/useCusQuery";
 import { useFullCusSearchQuery } from "@/views/customers/hooks/useFullCusSearchQuery";
 import { useSavedViewsQuery } from "@/views/customers/hooks/useSavedViewsQuery";
@@ -49,6 +46,11 @@ export function CustomerProductsTable() {
 		[],
 	);
 
+	const handleCancelClick = (product: FullCusProduct) => {
+		setSelectedProduct(product);
+		setCancelOpen(true);
+	};
+
 	const enableSorting = false;
 	const table = useReactTable({
 		data: filteredCustomers,
@@ -60,23 +62,9 @@ export function CustomerProductsTable() {
 		enableSorting,
 		meta: {
 			filterCustomerProducts,
+			onCancelClick: handleCancelClick,
 		},
 	});
-
-	const dropdownMenuItems = useMemo(() => {
-		return (row: Row<FullCusProduct>) => [
-			<DropdownMenuItem
-				key="cancel"
-				className="flex items-center gap-2 text-xs text-red-500"
-				onClick={() => {
-					setSelectedProduct(row.original);
-					setCancelOpen(true);
-				}}
-			>
-				<Delete size={16} /> Cancel
-			</DropdownMenuItem>,
-		];
-	}, []);
 
 	return (
 		<>
@@ -92,7 +80,6 @@ export function CustomerProductsTable() {
 					table,
 					numberOfColumns: attachedProductsTableColumns.length,
 					enableSorting,
-					dropdownMenuItems,
 					isLoading,
 				}}
 			>

@@ -1,6 +1,9 @@
 import type { FullCusProduct } from "@autumn/shared";
 import type { Row } from "@tanstack/react-table";
+import { Delete } from "lucide-react";
 import CopyButton from "@/components/general/CopyButton";
+import { TableDropdownMenuCell } from "@/components/general/table/TableDropdownMenuCell";
+import { DropdownMenuItem } from "@/components/ui/dropdown-menu";
 import { formatUnixToDateTimeString } from "@/utils/formatUtils/formatDateUtils";
 import { CustomerProductsStatus } from "./CustomerProductsStatus";
 
@@ -44,6 +47,29 @@ export const CustomerProductsTableColumns = [
 		accessorKey: "created_at",
 		cell: ({ row }: { row: Row<FullCusProduct> }) => {
 			return <div>{formatUnixToDateTimeString(row.original.created_at)}</div>;
+		},
+	},
+	{
+		id: "actions",
+		header: "",
+		size: 50,
+		cell: ({ row, table }: { row: Row<FullCusProduct>; table: any }) => {
+			const meta = table.options.meta as {
+				onCancelClick?: (product: FullCusProduct) => void;
+			};
+
+			if (!meta?.onCancelClick) return null;
+
+			return (
+				<TableDropdownMenuCell>
+					<DropdownMenuItem
+						className="flex items-center gap-2 text-xs text-red-500"
+						onClick={() => meta.onCancelClick?.(row.original)}
+					>
+						<Delete size={16} /> Cancel
+					</DropdownMenuItem>
+				</TableDropdownMenuCell>
+			);
 		},
 	},
 ];

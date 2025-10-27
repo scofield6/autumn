@@ -69,7 +69,7 @@ export const CustomerFeatureUsageColumns = [
 						return <div className="text-sm text-t3">Unlimited</div>;
 					}
 
-					const total = ent.allowance || 0;
+					const total = (ent.allowance || 0) * (meteredCusEnt.customer_product.quantity || 1);
 					const remaining = meteredCusEnt.balance || 0;
 					const used = total - remaining;
 					const spent = used * creditCost;
@@ -95,13 +95,12 @@ export const CustomerFeatureUsageColumns = [
 				return <div className="text-t3">Unlimited</div>;
 			}
 
-			const total = ent.allowance || 0;
+			const total = (ent.allowance || 0) * (cusEnt.customer_product.quantity || 1);
 			const remaining = cusEnt.balance || 0;
-			const used = total - remaining;
 
 			return (
 				<div className="font-mono">
-					{used}/{total}
+					{remaining}/{total}
 				</div>
 			);
 		},

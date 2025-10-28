@@ -1,8 +1,10 @@
 "use client";
 
+import { PencilIcon, TrashIcon } from "@phosphor-icons/react";
 import { useEffect, useState } from "react";
 import { Link, useSearchParams } from "react-router";
 import { Separator } from "@/components/ui/separator";
+import { Button } from "@/components/v2/buttons/Button";
 import { pushPage } from "@/utils/genUtils";
 import ErrorScreen from "@/views/general/ErrorScreen";
 import LoadingScreen from "@/views/general/LoadingScreen";
@@ -12,6 +14,7 @@ import { CustomerFeatureUsageTable } from "../components/table/customer-feature-
 import { CustomerInvoicesTable } from "../components/table/customer-invoices/CustomerInvoicesTable";
 import { CustomerProductsTable } from "../components/table/customer-products/CustomerProductsTable";
 import { CustomerUsageAnalyticsTable } from "../components/table/customer-usage-analytics/CustomerUsageAnalyticsTable";
+import { CustomerActions } from "./CustomerActions";
 import { CustomerBreadcrumbs } from "./CustomerBreadcrumbs2";
 import { CustomerContext } from "./CustomerContext";
 import { CustomerPageDetails } from "./CustomerPageDetails";
@@ -55,10 +58,15 @@ export default function CustomerView2() {
 			value={{ customer, entityId: entityId, setEntityId }}
 		>
 			<div className="flex flex-col [&>*:not([data-slot=separator-root])]:px-4 [&>*:not([data-slot=separator-root])]:py-4 [&>*:not([data-slot=separator-root])]:max-w-3xl [&>*:not([data-slot=separator-root])]:mx-auto">
-				<div className="flex flex-col gap-1 py-4 w-full">
-					<CustomerBreadcrumbs />
-					<h3>Manage {customer.name}</h3>
-					<CustomerPageDetails />
+				<div className="flex items-end justify-between w-full gap-4">
+					<div className="flex flex-col w-full">
+						<CustomerBreadcrumbs />
+						<h3 className="text-md font-medium pt-2 pb-2">
+							Manage {customer.name}
+						</h3>
+						<CustomerPageDetails />
+					</div>
+					<CustomerActions />
 				</div>
 				<Separator />
 				<CustomerProductsTable />

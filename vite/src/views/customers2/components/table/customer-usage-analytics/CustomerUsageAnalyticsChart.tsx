@@ -102,8 +102,8 @@ export function CustomerUsageAnalyticsChart({
 			<BarChart
 				accessibilityLayer
 				data={chartData}
-				barSize={60}
-				maxBarSize={80}
+				barSize={128}
+				maxBarSize={128}
 				className="[&_.recharts-cartesian-grid-bg]:fill-white [&_.recharts-cartesian-grid-bg]:stroke-border [&_.recharts-cartesian-grid-bg]:stroke-1 [&_.recharts-cartesian-grid-bg]:[rx:8px]"
 			>
 				<CartesianGrid vertical={false} fill="white" />

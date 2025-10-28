@@ -14,7 +14,7 @@ export function ShowExpiredActionButton({
 
 	return (
 		<CheckboxButton
-			className="rounded-lg shadow-none h-7.5 border-2"
+			className=""
 			checked={showExpired}
 			onCheckedChange={handleToggle}
 		>

@@ -1,7 +1,7 @@
 import type * as CheckboxPrimitive from "@radix-ui/react-checkbox";
 import * as React from "react";
-import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
+import { Button } from "@/components/v2/buttons/Button";
 import { cn } from "@/lib/utils";
 
 export const CheckboxButton = React.forwardRef<
@@ -16,8 +16,12 @@ export const CheckboxButton = React.forwardRef<
 	return (
 		<Button
 			variant="secondary"
+			size="sm"
 			onClick={handleClick}
-			className={cn("flex items-center gap-2", className)}
+			className={cn(
+				"flex items-center gap-2 rounded-lg shadow-none h-6 pr-1.5 pl-[7px] py-[5px]",
+				className,
+			)}
 		>
 			<Checkbox
 				checked={checked}

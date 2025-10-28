@@ -40,47 +40,43 @@ export function AttachProductDropdown() {
 	};
 
 	return (
-		<div className="relative w-full">
-			<DropdownMenu open={open} onOpenChange={setOpen}>
-				<DropdownMenuTrigger asChild>
-					<Button>
-						<PlusIcon />
-						Attach Product
-					</Button>
-				</DropdownMenuTrigger>
-				<DropdownMenuContent
-					className="w-fit max-w-xl whitespace-nowrap truncate max-h-[400px] overflow-y-auto"
-					align="end"
-				>
-					<div className="flex items-center border-b px-2">
-						<Search size={12} className="text-t3" />
-						<Input
-							type="search"
-							placeholder="Search plans"
-							className="h-7 rounded-none shadow-none border-0 focus:ring-0 focus-visible:ring-0 focus:ring-offset-0 focus:outline-none focus-visible:border-none focus-visible:shadow-none"
-							value={searchQuery}
-							onChange={(e) => setSearchQuery(e.target.value)}
-							onClick={(e) => e.stopPropagation()}
-							onKeyDown={(e) => e.stopPropagation()}
-							autoFocus
+		<DropdownMenu open={open} onOpenChange={setOpen}>
+			<DropdownMenuTrigger asChild>
+				<Button variant="primary" size="sm">
+					<PlusIcon />
+					Attach Product
+				</Button>
+			</DropdownMenuTrigger>
+			<DropdownMenuContent
+				className="w-fit max-w-xl whitespace-nowrap truncate max-h-[400px] overflow-y-auto"
+				align="end"
+			>
+				<div className="flex items-center border-b px-2">
+					<Search size={12} className="text-t3" />
+					<Input
+						type="search"
+						placeholder="Search plans"
+						className="h-7 rounded-none shadow-none border-0 focus:ring-0 focus-visible:ring-0 focus:ring-offset-0 focus:outline-none focus-visible:border-none focus-visible:shadow-none"
+						value={searchQuery}
+						onChange={(e) => setSearchQuery(e.target.value)}
+						onClick={(e) => e.stopPropagation()}
+						onKeyDown={(e) => e.stopPropagation()}
+						autoFocus
+					/>
+				</div>
+				{filteredProducts.length === 0 ? (
+					<div className="py-2 px-3 text-sm text-t3">No new products found</div>
+				) : (
+					filteredProducts.map((product: ProductV2) => (
+						<DropdownProductItem
+							key={product.id}
+							product={product}
+							handleAddProduct={handleAddProduct}
 						/>
-					</div>
-					{filteredProducts.length === 0 ? (
-						<div className="py-2 px-3 text-sm text-t3">
-							No new products found
-						</div>
-					) : (
-						filteredProducts.map((product: ProductV2) => (
-							<DropdownProductItem
-								key={product.id}
-								product={product}
-								handleAddProduct={handleAddProduct}
-							/>
-						))
-					)}
-				</DropdownMenuContent>
-			</DropdownMenu>
-		</div>
+					))
+				)}
+			</DropdownMenuContent>
+		</DropdownMenu>
 	);
 }
 

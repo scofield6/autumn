@@ -54,6 +54,7 @@ const buttonVariants = cva(
 			size: {
 				default: "py-1 !px-[7px] text-body h-input",
 				sm: "py-1 !px-[7px] text-tiny h-6",
+				icon: "p-1 h-6 text-tiny",
 			},
 		},
 		defaultVariants: {

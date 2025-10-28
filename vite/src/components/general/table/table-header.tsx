@@ -69,7 +69,7 @@ function HeaderContent<T>({
 }
 
 export function TableHeader() {
-	const { table, enableSelection, dropdownMenuItems } = useTableContext();
+	const { table, enableSelection } = useTableContext();
 	const headerGroups = table.getHeaderGroups();
 	return (
 		<ShadcnTableHeader>
@@ -98,7 +98,6 @@ export function TableHeader() {
 							<HeaderContent header={header} />
 						</TableHead>
 					))}
-					{dropdownMenuItems && <TableHead className="w-[50px]" />}
 				</TableRow>
 			))}
 		</ShadcnTableHeader>

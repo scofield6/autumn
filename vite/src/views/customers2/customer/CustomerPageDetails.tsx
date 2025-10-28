@@ -4,6 +4,9 @@ import { ArrowSquareOutIcon, FingerprintIcon } from "@phosphor-icons/react";
 import { ArrowUpRightFromSquare } from "lucide-react";
 import { Button } from "@/components/v2/buttons/Button";
 import { CopyButton } from "@/components/v2/buttons/CopyButton";
+import { useOrgStripeQuery } from "@/hooks/queries/useOrgStripeQuery";
+import { useEnv } from "@/utils/envUtils";
+import { getStripeCusLink } from "@/utils/linkUtils";
 import { useCustomerContext } from "./CustomerContext";
 
 const mutedDivClassName =
@@ -11,6 +14,9 @@ const mutedDivClassName =
 
 export const CustomerPageDetails = () => {
 	const { customer } = useCustomerContext();
+	const env = useEnv();
+	const { stripeAccount } = useOrgStripeQuery();
+
 	return (
 		<div className="flex gap-2">
 			<CopyButton text={customer.id ?? "NULL"} size="sm" />
@@ -19,10 +25,22 @@ export const CustomerPageDetails = () => {
 				<FingerprintIcon size={12} />
 				{customer.fingerprint ?? "NULL"}
 			</div>
-			<Button variant="muted" size="sm">
-				<FontAwesomeIcon icon={faStripe} className="!h-6 !w-6 text-t3" />
-				<ArrowSquareOutIcon size={12} />
-			</Button>
+			{customer.processor?.id && (
+				<a
+					href={getStripeCusLink({
+						customerId: customer.processor.id,
+						env,
+						accountId: stripeAccount?.id,
+					})}
+					target="_blank"
+					rel="noopener noreferrer"
+				>
+					<Button variant="muted" size="sm">
+						<FontAwesomeIcon icon={faStripe} className="!h-6 !w-6 text-t3" />
+						<ArrowSquareOutIcon size={12} />
+					</Button>
+				</a>
+			)}
 		</div>
 	);
 };

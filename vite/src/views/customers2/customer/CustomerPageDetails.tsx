@@ -12,6 +12,8 @@ import { useCustomerContext } from "./CustomerContext";
 const mutedDivClassName =
 	"py-0.5 px-1.5 bg-muted rounded-lg text-t3 text-tiny flex items-center justify-center gap-1 h-6";
 
+const placeholderText = "NULL";
+
 export const CustomerPageDetails = () => {
 	const { customer } = useCustomerContext();
 	const env = useEnv();
@@ -19,27 +21,32 @@ export const CustomerPageDetails = () => {
 
 	return (
 		<div className="flex gap-2">
-			<CopyButton text={customer.id ?? "NULL"} size="sm" />
-			<div className={mutedDivClassName}>{customer.email}</div>
+			<CopyButton text={customer.id ?? placeholderText} size="sm" />
+			<div className={mutedDivClassName}>
+				{customer.email ?? placeholderText}
+			</div>
 			<div className={mutedDivClassName}>
 				<FingerprintIcon size={12} />
-				{customer.fingerprint ?? "NULL"}
+				{customer.fingerprint ?? placeholderText}
 			</div>
 			{customer.processor?.id && (
-				<a
-					href={getStripeCusLink({
-						customerId: customer.processor.id,
-						env,
-						accountId: stripeAccount?.id,
-					})}
-					target="_blank"
-					rel="noopener noreferrer"
+				<Button
+					variant="muted"
+					size="sm"
+					onClick={() => {
+						window.open(
+							getStripeCusLink({
+								customerId: customer.processor.id,
+								env,
+								accountId: stripeAccount?.id,
+							}),
+							"_blank",
+						);
+					}}
 				>
-					<Button variant="muted" size="sm">
-						<FontAwesomeIcon icon={faStripe} className="!h-6 !w-6 text-t3" />
-						<ArrowSquareOutIcon size={12} />
-					</Button>
-				</a>
+					<FontAwesomeIcon icon={faStripe} className="!h-6 !w-6 text-t3" />
+					<ArrowSquareOutIcon size={12} />
+				</Button>
 			)}
 		</div>
 	);

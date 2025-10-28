@@ -68,11 +68,11 @@ function HeaderContent<T>({
 	);
 }
 
-export function TableHeader() {
+export function TableHeader({ className }: { className?: string }) {
 	const { table, enableSelection } = useTableContext();
 	const headerGroups = table.getHeaderGroups();
 	return (
-		<ShadcnTableHeader>
+		<ShadcnTableHeader className={className}>
 			{headerGroups.map((headerGroup) => (
 				<TableRow className="hover:bg-transparent" key={headerGroup.id}>
 					{enableSelection && table && (

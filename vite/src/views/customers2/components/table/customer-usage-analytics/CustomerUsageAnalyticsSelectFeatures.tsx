@@ -1,10 +1,10 @@
 import { Check, ChevronDown } from "lucide-react";
-import { Button } from "@/components/ui/button";
 import {
 	Popover,
 	PopoverContent,
 	PopoverTrigger,
 } from "@/components/ui/popover";
+import { Button } from "@/components/v2/buttons/Button";
 import { cn } from "@/lib/utils";
 
 export function CustomerUsageAnalyticsSelectFeatures({
@@ -35,9 +35,10 @@ export function CustomerUsageAnalyticsSelectFeatures({
 		<Popover>
 			<PopoverTrigger asChild>
 				<Button
-					variant="outline"
+					variant="secondary"
 					role="combobox"
-					className="w-[180px] h-7.5 text-sm rounded-lg justify-between font-normal"
+					size="sm"
+					className="justify-between font-normal"
 				>
 					<span className="truncate">{displayText}</span>
 					<ChevronDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
@@ -45,8 +46,7 @@ export function CustomerUsageAnalyticsSelectFeatures({
 			</PopoverTrigger>
 			<PopoverContent className="w-[180px] p-1" align="end">
 				{availableFeatures.map((feature) => {
-					const isSelected =
-						selectedFeatures.includes(feature);
+					const isSelected = selectedFeatures.includes(feature);
 					return (
 						<div
 							key={feature}

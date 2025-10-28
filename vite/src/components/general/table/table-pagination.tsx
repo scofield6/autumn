@@ -5,13 +5,8 @@ import {
 	ChevronRightIcon,
 } from "lucide-react";
 import { useId } from "react";
-import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
-import {
-	Pagination,
-	PaginationContent,
-	PaginationItem,
-} from "@/components/ui/pagination";
+import { Pagination, PaginationContent } from "@/components/ui/pagination";
 import {
 	Select,
 	SelectContent,
@@ -19,14 +14,20 @@ import {
 	SelectTrigger,
 	SelectValue,
 } from "@/components/ui/select";
+import { Button } from "@/components/v2/buttons/Button";
+import { Separator } from "@/components/v2/separator";
+import { cn } from "@/lib/utils";
 import { useTableContext } from "./table-context";
+
+const paginationButtonClassName =
+	"disabled:pointer-events-none disabled:opacity-50 rounded-none border-none";
 
 export function TablePagination() {
 	const { table } = useTableContext();
 	const id = useId();
 	return (
-		<div className="flex items-center justify-between gap-4 pt-2">
-			<div className="flex items-center gap-3">
+		<div className="flex items-center justify-between gap-4 pt-4">
+			<div className="flex items-center gap-2">
 				<Label
 					className="max-sm:sr-only text-xs text-muted-foreground"
 					htmlFor={id}
@@ -40,7 +41,7 @@ export function TablePagination() {
 					value={table.getState().pagination.pageSize.toString()}
 				>
 					<SelectTrigger
-						className="w-fit whitespace-nowrap rounded-lg p-1 text-xs"
+						className="w-fit whitespace-nowrap rounded-lg p-1 text-xs h-6 pr-0"
 						id={id}
 					>
 						<SelectValue placeholder="Select number of results" />
@@ -59,6 +60,7 @@ export function TablePagination() {
 					aria-live="polite"
 					className="flex gap-1 whitespace-nowrap text-muted-foreground text-sm"
 				>
+					Showing
 					<span className="text-foreground">
 						{table.getState().pagination.pageIndex *
 							table.getState().pagination.pageSize +
@@ -74,7 +76,7 @@ export function TablePagination() {
 							table.getRowCount(),
 						)}
 					</span>{" "}
-					of
+					out of
 					<span className="text-foreground">
 						{table.getRowCount().toString()}
 					</span>
@@ -84,54 +86,55 @@ export function TablePagination() {
 			<div>
 				<Pagination>
 					<PaginationContent>
-						<PaginationItem>
+						<div className="inline-flex rounded-lg overflow-hidden border border-border">
 							<Button
 								aria-label="Go to first page"
-								className="disabled:pointer-events-none disabled:opacity-50 rounded-lg"
+								className={paginationButtonClassName}
 								disabled={!table.getCanPreviousPage()}
 								onClick={() => table.firstPage()}
-								size="iconSmall"
-								variant="outline"
+								size="icon"
+								variant="secondary"
 							>
 								<ChevronFirstIcon aria-hidden="true" size={16} />
 							</Button>
-						</PaginationItem>
-						<PaginationItem>
+							<Separator orientation="vertical" />
 							<Button
 								aria-label="Go to previous page"
-								className="disabled:pointer-events-none disabled:opacity-50 rounded-lg"
+								className={paginationButtonClassName}
 								disabled={!table.getCanPreviousPage()}
 								onClick={() => table.previousPage()}
-								size="iconSmall"
-								variant="outline"
+								size="icon"
+								variant="secondary"
 							>
 								<ChevronLeftIcon aria-hidden="true" size={16} />
 							</Button>
-						</PaginationItem>
-						<PaginationItem>
+							<Separator orientation="vertical" />
+							<div className="flex items-center justify-center px-4 bg-background text-sm font-medium">
+								{table.getState().pagination.pageIndex + 1}
+							</div>
+							<Separator orientation="vertical" />
 							<Button
 								aria-label="Go to next page"
-								className="disabled:pointer-events-none disabled:opacity-50 rounded-lg"
+								className={paginationButtonClassName}
 								disabled={!table.getCanNextPage()}
 								onClick={() => table.nextPage()}
-								size="iconSmall"
-								variant="outline"
+								size="icon"
+								variant="secondary"
 							>
 								<ChevronRightIcon aria-hidden="true" size={16} />
 							</Button>
-						</PaginationItem>
-						<PaginationItem>
+							<Separator orientation="vertical" />
 							<Button
 								aria-label="Go to last page"
-								className="disabled:pointer-events-none disabled:opacity-50 rounded-lg"
+								className={paginationButtonClassName}
 								disabled={!table.getCanNextPage()}
 								onClick={() => table.lastPage()}
-								size="iconSmall"
-								variant="outline"
+								size="icon"
+								variant="secondary"
 							>
 								<ChevronLastIcon aria-hidden="true" size={16} />
 							</Button>
-						</PaginationItem>
+						</div>
 					</PaginationContent>
 				</Pagination>
 			</div>

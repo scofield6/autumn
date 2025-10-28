@@ -160,7 +160,6 @@ export function CustomerFeatureUsageTable() {
 				>
 					<Table.Container className="!pt-0">
 						<Table.Content>
-							<Table.Header />
 							<Table.Body />
 						</Table.Content>
 					</Table.Container>

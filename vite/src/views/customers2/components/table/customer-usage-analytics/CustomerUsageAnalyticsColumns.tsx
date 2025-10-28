@@ -7,7 +7,7 @@ export const CustomerUsageAnalyticsColumns = [
 		header: "Event Name",
 		accessorKey: "event_name",
 		cell: ({ row }: { row: Row<Event> }) => {
-			return <div className="font-mono">{row.original.event_name}</div>;
+			return <div>{row.original.event_name}</div>;
 		},
 	},
 	{
@@ -15,11 +15,7 @@ export const CustomerUsageAnalyticsColumns = [
 		accessorKey: "value",
 		cell: ({ row }: { row: Row<Event> }) => {
 			const event = row.original;
-			return (
-				<div className="font-mono">
-					{event.value || event.properties?.value || 1}
-				</div>
-			);
+			return <div>{event.value || event.properties?.value || 1}</div>;
 		},
 	},
 	{

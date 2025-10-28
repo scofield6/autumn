@@ -197,12 +197,8 @@ export const CustomerFeatureUsageColumns = [
 			const isExpanded = row.getIsExpanded();
 			const isSubRow = "isSubRow" in cusEnt && cusEnt.isSubRow;
 
-			if (isSubRow) {
-				return null;
-			}
-
-			if (!canExpand) {
-				return null;
+			if (isSubRow || !canExpand) {
+				return <div className="w-0" />;
 			}
 
 			return (

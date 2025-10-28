@@ -36,7 +36,7 @@ export function TableBody() {
 		<ShadcnTableBody>
 			{rows.map((row) => (
 				<TableRow
-					className="h-14 hover:bg-muted/50"
+					className="h-14 py-4 hover:bg-muted/50 text-t3"
 					data-state={row.getIsSelected() && "selected"}
 					key={row.id}
 				>
@@ -51,7 +51,7 @@ export function TableBody() {
 					)}
 					{row.getVisibleCells().map((cell, index) => (
 						<TableCell
-							className={cn("px-2 h-4", index === 0 && "pl-4")}
+							className={cn("px-2 h-4 text-t3", index === 0 && "pl-4 text-t2")}
 							key={cell.id}
 						>
 							{flexRender(cell.column.columnDef.cell, cell.getContext())}

@@ -1,3 +1,5 @@
+import { faStripe } from "@fortawesome/free-brands-svg-icons";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { ArrowSquareOutIcon, FingerprintIcon } from "@phosphor-icons/react";
 import { ArrowUpRightFromSquare } from "lucide-react";
 import { Button } from "@/components/v2/buttons/Button";
@@ -18,7 +20,7 @@ export const CustomerPageDetails = () => {
 				{customer.fingerprint ?? "NULL"}
 			</div>
 			<Button variant="muted" size="sm">
-				stripe
+				<FontAwesomeIcon icon={faStripe} className="!h-6 !w-6 text-t3" />
 				<ArrowSquareOutIcon size={12} />
 			</Button>
 		</div>

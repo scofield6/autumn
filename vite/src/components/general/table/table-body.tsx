@@ -10,22 +10,15 @@ import SmallSpinner from "../SmallSpinner";
 import { useTableContext } from "./table-context";
 
 export function TableBody() {
-	const {
-		table,
-		numberOfColumns,
-		enableSelection,
-		isLoading,
-	} = useTableContext();
+	const { table, numberOfColumns, enableSelection, isLoading } =
+		useTableContext();
 	const rows = table.getRowModel().rows;
 
 	if (!rows.length) {
 		return (
 			<ShadcnTableBody>
 				<TableRow>
-					<TableCell
-						className="h-24 text-center"
-						colSpan={numberOfColumns}
-					>
+					<TableCell className="h-24 text-center" colSpan={numberOfColumns}>
 						{isLoading ? (
 							<div className="flex justify-center items-center">
 								<SmallSpinner />

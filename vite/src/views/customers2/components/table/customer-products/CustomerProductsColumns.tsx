@@ -7,7 +7,7 @@ import { DropdownMenuItem } from "@/components/ui/dropdown-menu";
 import { formatUnixToDateTimeString } from "@/utils/formatUtils/formatDateUtils";
 import { CustomerProductsStatus } from "./CustomerProductsStatus";
 
-export const CustomerProductsTableColumns = [
+export const CustomerProductsColumns = [
 	{
 		header: "Name",
 		accessorKey: "name",
@@ -24,9 +24,9 @@ export const CustomerProductsTableColumns = [
 					{row.original.id ? (
 						<CopyButton
 							text={row.original.id || ""}
-							className="bg-transparent text-t3 border-none px-1 shadow-none max-w-full"
+							className="bg-transparent text-t3 border-none px-1 shadow-none max-w-full font-sans"
 						>
-							<span className="truncate">{row.original.id}</span>
+							<span className="truncate">{row.original.product_id}</span>
 						</CopyButton>
 					) : (
 						<span className="px-1 text-t3">NULL</span>

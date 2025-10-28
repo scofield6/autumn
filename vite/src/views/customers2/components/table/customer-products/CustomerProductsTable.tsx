@@ -12,7 +12,7 @@ import { useFullCusSearchQuery } from "@/views/customers/hooks/useFullCusSearchQ
 import { useSavedViewsQuery } from "@/views/customers/hooks/useSavedViewsQuery";
 import { AttachProductDropdown } from "./AttachProductDropdown";
 import { CancelProductDialog } from "./CancelProductDialog";
-import { CustomerProductsTableColumns } from "./CustomerProductsTableColumns";
+import { CustomerProductsColumns } from "./CustomerProductsColumns";
 import { filterCustomerProducts } from "./customerProductsTableFilters";
 import { ShowExpiredActionButton } from "./ShowExpiredActionButton";
 
@@ -42,7 +42,7 @@ export function CustomerProductsTable() {
 	);
 
 	const attachedProductsTableColumns = useMemo(
-		() => CustomerProductsTableColumns,
+		() => CustomerProductsColumns,
 		[],
 	);
 

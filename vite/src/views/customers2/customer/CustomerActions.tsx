@@ -26,11 +26,12 @@ export function CustomerActions() {
 				redirectToCustomersPage
 			/>
 			<Button
-				size="sm"
+				size="mini"
 				variant="secondary"
 				onClick={() => setIsModalOpen(true)}
+				className="gap-1"
 			>
-				<PencilIcon />
+				<PencilIcon className="text-t3" />
 				Customer details
 			</Button>
 
@@ -39,7 +40,7 @@ export function CustomerActions() {
 				variant="secondary"
 				onClick={() => setDeleteOpen(true)}
 			>
-				<TrashIcon />
+				<TrashIcon className="text-t3" />
 			</Button>
 		</div>
 	);

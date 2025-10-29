@@ -9,13 +9,13 @@ export function CustomerUsageAnalyticsFullButton() {
 	return (
 		<Button
 			variant="secondary"
-			size="sm"
+			size="mini"
 			className="flex items-center gap-1"
 			onClick={() => {
 				pushPage({ path: "/analytics", navigate });
 			}}
 		>
-			<ChartBarIcon />
+			<ChartBarIcon className="text-t3" />
 			Full Analytics
 		</Button>
 	);

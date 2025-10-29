@@ -40,7 +40,7 @@ export const CustomerFeatureUsageColumns = [
 			if (isSubRow) {
 				const subRowData = cusEnt as any;
 				return (
-					<div className="flex items-center gap-2 pl-8">
+					<div className="flex items-center gap-2 pl-4">
 						<span>{subRowData.feature?.name || "Unknown Feature"}</span>
 					</div>
 				);

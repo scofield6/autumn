@@ -61,7 +61,7 @@ export default function CustomerView2() {
 				<div className="flex items-end justify-between w-full gap-4">
 					<div className="flex flex-col w-full">
 						<CustomerBreadcrumbs />
-						<h3 className="text-md font-medium pt-2 pb-2">
+						<h3 className="text-md font-semibold text-t2 pt-2.5 pb-2">
 							Manage {customer.name}
 						</h3>
 						<CustomerPageDetails />

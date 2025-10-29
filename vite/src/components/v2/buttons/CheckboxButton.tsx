@@ -16,10 +16,10 @@ export const CheckboxButton = React.forwardRef<
 	return (
 		<Button
 			variant="secondary"
-			size="sm"
+			size="mini"
 			onClick={handleClick}
 			className={cn(
-				"flex items-center gap-2 rounded-lg shadow-none h-6 pr-1.5 pl-[7px] py-[5px]",
+				"flex items-center gap-1.5 rounded-lg shadow-none h-6 pr-1.5 pl-[7px] py-[5px]",
 				className,
 			)}
 		>

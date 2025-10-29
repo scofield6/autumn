@@ -24,11 +24,11 @@ export function CustomerUsageAnalyticsSelectDays({
 				<Button
 					variant="secondary"
 					role="combobox"
-					size="sm"
-					className="justify-between font-normal"
+					size="mini"
+					className="justify-between font-normal !px-2 gap-3"
 				>
 					<span className="truncate">{displayText}</span>
-					<ChevronDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+					<ChevronDown className="h-4 w-4 shrink-0 text-t3" />
 				</Button>
 			</PopoverTrigger>
 			<PopoverContent className="w-[180px] p-1" align="end">

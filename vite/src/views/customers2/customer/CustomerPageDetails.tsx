@@ -10,7 +10,7 @@ import { getStripeCusLink } from "@/utils/linkUtils";
 import { useCustomerContext } from "./CustomerContext";
 
 const mutedDivClassName =
-	"py-0.5 px-1.5 bg-muted rounded-lg text-t3 text-tiny flex items-center justify-center gap-1 h-6";
+	"py-0.5 px-1.5 bg-muted rounded-lg text-t3 text-sm flex items-center justify-center gap-1 h-6";
 
 const placeholderText = "NULL";
 
@@ -21,12 +21,16 @@ export const CustomerPageDetails = () => {
 
 	return (
 		<div className="flex gap-2">
-			<CopyButton text={customer.id ?? placeholderText} size="sm" />
+			<CopyButton
+				text={customer.id ?? placeholderText}
+				size="sm"
+				innerClassName="!text-sm !font-sans"
+			/>
 			<div className={mutedDivClassName}>
 				{customer.email ?? placeholderText}
 			</div>
 			<div className={mutedDivClassName}>
-				<FingerprintIcon size={12} />
+				<FingerprintIcon size={16} />
 				{customer.fingerprint ?? placeholderText}
 			</div>
 			{customer.processor?.id && (

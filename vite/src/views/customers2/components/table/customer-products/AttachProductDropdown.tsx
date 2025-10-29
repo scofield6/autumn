@@ -42,7 +42,7 @@ export function AttachProductDropdown() {
 	return (
 		<DropdownMenu open={open} onOpenChange={setOpen}>
 			<DropdownMenuTrigger asChild>
-				<Button variant="primary" size="sm">
+				<Button variant="primary" size="mini" className="gap-1 font-medium">
 					<PlusIcon />
 					Attach Product
 				</Button>

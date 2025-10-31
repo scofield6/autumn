@@ -20,13 +20,11 @@ export function CustomerUsageAnalyticsChart({
 	const { chartData, chartConfig, eventNames, maxValue } = useMemo(() => {
 		console.log("Chart events:", events);
 
-		// Get unique event names (even if no events, we need this for config)
 		const uniqueEventNames =
 			events && events.length > 0
 				? Array.from(new Set(events.map((e: Event) => e.event_name)))
 				: [];
 
-		// Create chart config
 		const config: ChartConfig = {};
 		uniqueEventNames.forEach((name: string, index: number) => {
 			config[name] = {
@@ -35,7 +33,6 @@ export function CustomerUsageAnalyticsChart({
 			};
 		});
 
-		// Generate all dates in range
 		const allDates: Record<string, Record<string, number>> = {};
 
 		for (let i = daysToShow - 1; i >= 0; i--) {
@@ -48,14 +45,13 @@ export function CustomerUsageAnalyticsChart({
 			allDates[dayKey] = {};
 		}
 
-		// Group events by day
 		if (events && events.length > 0) {
 			events.forEach((event: Event) => {
-				// Handle both Unix timestamp (number) and ISO string formats
 				const date =
 					typeof event.timestamp === "number"
 						? new Date(event.timestamp * 1000)
-						: new Date(event.timestamp);
+						: // type is Date but actually comes as a string
+							new Date(event.timestamp as unknown as string);
 
 				const dayKey = date.toLocaleDateString("en-US", {
 					month: "short",
@@ -69,13 +65,11 @@ export function CustomerUsageAnalyticsChart({
 			});
 		}
 
-		// Transform to chart data format
 		const data = Object.entries(allDates).map(([day, counts]) => ({
 			date: day,
 			...counts,
 		}));
 
-		// Calculate max stacked value
 		const max = Math.max(
 			...data.map((day) =>
 				uniqueEventNames.reduce(

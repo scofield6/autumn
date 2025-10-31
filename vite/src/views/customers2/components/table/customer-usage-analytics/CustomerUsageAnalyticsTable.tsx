@@ -33,7 +33,9 @@ export function CustomerUsageAnalyticsTable() {
 
 	const availableFeatures = useMemo(() => {
 		if (!events || events.length === 0) return [];
-		return Array.from(new Set(events.map((e: any) => e.event_name)));
+		return Array.from(
+			new Set(events.map((e: Event & { event_name: string }) => e.event_name)),
+		);
 	}, [events]);
 
 	// Initialize selectedFeatures with all features on first load
@@ -43,7 +45,7 @@ export function CustomerUsageAnalyticsTable() {
 			selectedFeatures &&
 			selectedFeatures.length === 0
 		) {
-			setSelectedFeatures(availableFeatures);
+			setSelectedFeatures(availableFeatures as string[]);
 		}
 	}, [availableFeatures, selectedFeatures, setSelectedFeatures]);
 
@@ -54,18 +56,19 @@ export function CustomerUsageAnalyticsTable() {
 		cutoffDate.setDate(cutoffDate.getDate() - selectedDays);
 		const cutoffTime = cutoffDate.getTime();
 
-		const filtered = events.filter((event: any) => {
-			const eventTime =
-				typeof event.timestamp === "number"
-					? event.timestamp * 1000
-					: new Date(event.timestamp).getTime();
+		const filtered = events.filter(
+			(event: Event & { timestamp: number; event_name: string }) => {
+				const eventTime =
+					typeof event.timestamp === "number"
+						? event.timestamp * 1000
+						: new Date(event.timestamp).getTime();
 
-			const withinTimeRange = eventTime >= cutoffTime;
-			const matchesFeature =
-				selectedFeatures && selectedFeatures.includes(event.event_name);
+				const withinTimeRange = eventTime >= cutoffTime;
+				const matchesFeature = selectedFeatures?.includes(event.event_name);
 
-			return withinTimeRange && matchesFeature;
-		});
+				return withinTimeRange && matchesFeature;
+			},
+		);
 
 		return filtered;
 	}, [events, selectedDays, selectedFeatures]);

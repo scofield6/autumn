@@ -17,6 +17,7 @@ import { Table } from "@/components/general/table";
 import { useCusQuery } from "@/views/customers/customer/hooks/useCusQuery";
 import { ShowExpiredActionButton } from "../customer-products/ShowExpiredActionButton";
 import { CustomerFeatureUsageColumns } from "./CustomerFeatureUsageColumns";
+import { filterCustomerFeatureUsage } from "./customerFeatureUsageTableFilters";
 
 export function CustomerFeatureUsageTable() {
 	const { customer, features, isLoading } = useCusQuery();
@@ -44,6 +45,77 @@ export function CustomerFeatureUsageTable() {
 		return new Map(features.map((f) => [f.id, f]));
 	}, [features]);
 
+	const filteredCusEnts = useMemo(
+		() =>
+			filterCustomerFeatureUsage({
+				entitlements: cusEnts,
+				showExpired: showExpired ?? true,
+			}),
+		[cusEnts, showExpired],
+	);
+
+	const deduplicatedCusEnts = useMemo(() => {
+		// Group by feature ID
+		const featureMap = new Map<
+			string,
+			FullCusEntWithFullCusProduct[]
+		>();
+
+		for (const ent of filteredCusEnts) {
+			const featureId = ent.entitlement.feature.id;
+			if (!featureMap.has(featureId)) {
+				featureMap.set(featureId, []);
+			}
+			featureMap.get(featureId)!.push(ent);
+		}
+
+		// Combine entitlements with same feature ID
+		const combined: FullCusEntWithFullCusProduct[] = [];
+
+		for (const ents of featureMap.values()) {
+			if (ents.length === 1) {
+				// No duplicates, use as-is
+				combined.push(ents[0]);
+			} else {
+				// Combine multiple entitlements
+				const first = ents[0];
+				const summedBalance = ents.reduce((sum, e) => sum + (e.balance ?? 0), 0);
+				const summedAllowance = ents.reduce(
+					(sum, e) => sum + (e.entitlement.allowance ?? 0),
+					0,
+				);
+				const summedQuantity = ents.reduce(
+					(sum, e) => sum + (e.customer_product.quantity ?? 1),
+					0,
+				);
+				const earliestReset = ents.reduce(
+					(earliest, e) => {
+						if (!e.next_reset_at) return earliest;
+						if (!earliest) return e.next_reset_at;
+						return Math.min(earliest, e.next_reset_at);
+					},
+					null as number | null,
+				);
+
+				combined.push({
+					...first,
+					balance: summedBalance,
+					entitlement: {
+						...first.entitlement,
+						allowance: summedAllowance,
+					},
+					customer_product: {
+						...first.customer_product,
+						quantity: summedQuantity,
+					},
+					next_reset_at: earliestReset ?? first.next_reset_at,
+				});
+			}
+		}
+
+		return combined;
+	}, [filteredCusEnts]);
+
 	const nonBooleanEnts = useMemo(() => {
 		// Create a map of feature id to customer entitlements for quick lookup
 		const featureIdToCusEnt = new Map(
@@ -53,7 +125,7 @@ export function CustomerFeatureUsageTable() {
 			]),
 		);
 
-		return cusEnts
+		return deduplicatedCusEnts
 			.filter(
 				(ent: FullCusEntWithFullCusProduct) =>
 					ent.entitlement.feature.type !== FeatureType.Boolean,
@@ -87,15 +159,15 @@ export function CustomerFeatureUsageTable() {
 				}
 				return ent;
 			});
-	}, [cusEnts, featuresMap]);
+	}, [cusEnts, deduplicatedCusEnts, featuresMap]);
 
 	const booleanEnts = useMemo(
 		() =>
-			cusEnts.filter(
+			deduplicatedCusEnts.filter(
 				(ent: FullCusEntWithFullCusProduct) =>
 					ent.entitlement.feature.type === FeatureType.Boolean,
 			),
-		[cusEnts],
+		[deduplicatedCusEnts],
 	);
 
 	const enableSorting = false;

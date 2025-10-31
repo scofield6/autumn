@@ -8,7 +8,6 @@ export function ShowExpiredActionButton({
 	setShowExpired: (showExpired: boolean) => Promise<URLSearchParams>;
 }) {
 	const handleToggle = async (checked: boolean) => {
-		console.log("handleToggle", checked);
 		await setShowExpired(checked);
 	};
 

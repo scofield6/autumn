@@ -23,12 +23,16 @@ export function CustomerFeatureUsageBar({
 		quantity,
 	});
 	const barColor = getUsageBarColor(percentage);
+	let displayPercentage = Math.min(percentage, 100);
+	if (displayPercentage < 0) {
+		displayPercentage = displayPercentage * -1;
+	}
 
 	return (
 		<div className="w-0.5 h-8 rounded-full bg-gray-200 flex flex-col justify-end overflow-hidden">
 			<div
 				className={cn("w-full", barColor)}
-				style={{ height: `${percentage}%` }}
+				style={{ height: `${displayPercentage}%` }}
 			/>
 		</div>
 	);

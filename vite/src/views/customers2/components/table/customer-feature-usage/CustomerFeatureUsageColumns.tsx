@@ -1,37 +1,17 @@
+// add the edge case where if usage is greater than allowance it's just a red bar
+
 import {
 	AllowanceType,
 	FeatureType,
 	type FullCusEntWithFullCusProduct,
 } from "@autumn/shared";
-import {
-	CaretDownIcon,
-	CaretRightIcon,
-	PokerChipIcon,
-} from "@phosphor-icons/react";
+import { CaretDownIcon, CaretRightIcon } from "@phosphor-icons/react";
 import type { Row } from "@tanstack/react-table";
-import {
-	Tooltip,
-	TooltipContent,
-	TooltipTrigger,
-} from "@/components/v2/tooltips/Tooltip";
 import { cn } from "@/lib/utils";
-import { formatUnixToDateTime } from "@/utils/formatUtils/formatDateUtils";
-import { getFeatureIcon } from "@/views/products/features/utils/getFeatureIcon";
+import { CustomerFeatureConfiguration } from "./CustomerFeatureConfiguration";
+import { CustomerFeatureResetDate } from "./CustomerFeatureResetDate";
 import { CustomerFeatureUsageBar } from "./CustomerFeatureUsageBar";
-import { calculateUsageMetrics } from "./calculateUsageMetrics";
-
-const getFeatureTypeLabel = (type: FeatureType): string => {
-	switch (type) {
-		case FeatureType.Boolean:
-			return "Boolean";
-		case FeatureType.Metered:
-			return "Metered";
-		case FeatureType.CreditSystem:
-			return "Credit System";
-		default:
-			return "Feature";
-	}
-};
+import { CustomerFeatureUsageDisplay } from "./CustomerFeatureUsageDisplay";
 
 interface SubRowData {
 	isSubRow: boolean;
@@ -61,28 +41,86 @@ export const CustomerFeatureUsageColumns = [
 			let quantity: number;
 			let featureName: string;
 			let className: string | undefined;
+			let featureType: FeatureType;
 
 			if (subRowData) {
-				const { meteredCusEnt, feature } = subRowData;
-				allowance = cusEnt.entitlement?.allowance ?? 0;
-				balance = meteredCusEnt?.balance ?? 0;
-				quantity = meteredCusEnt?.customer_product.quantity ?? 1;
-				featureName = feature.name;
+				// For subrows, calculate progress based on credit spending vs parent's total
+				const parentAllowance = cusEnt.entitlement?.allowance ?? 0;
+				const parentQuantity = cusEnt.customer_product.quantity || 1;
+				const parentTotal = parentAllowance * parentQuantity;
+
+				// Calculate metered feature usage
+				const meteredCusEnt = subRowData.meteredCusEnt;
+				if (meteredCusEnt?.entitlement) {
+					const meteredAllowance =
+						meteredCusEnt.entitlement.allowance || 0;
+					const meteredQuantity = meteredCusEnt.customer_product.quantity || 1;
+					const meteredTotal = meteredAllowance * meteredQuantity;
+					const meteredBalance = meteredCusEnt.balance || 0;
+					const meteredUsed = meteredTotal - meteredBalance;
+
+					// Calculate credits spent
+					const creditAmount = subRowData.credit_amount || 0;
+					const creditsSpent = meteredUsed * creditAmount;
+
+					// Use parent's allowance but effective balance based on credits
+					allowance = parentAllowance;
+					quantity = parentQuantity;
+					balance = parentTotal - creditsSpent;
+				} else {
+					// Fallback if no metered entitlement data
+					allowance = cusEnt.entitlement?.allowance ?? 0;
+					balance = subRowData.meteredCusEnt?.balance ?? 0;
+					quantity = cusEnt.customer_product.quantity || 1;
+				}
+
+				featureName = subRowData.feature.name;
+				featureType = subRowData.feature.type;
 				className = "pl-4";
 			} else {
 				allowance = cusEnt.entitlement?.allowance ?? 0;
 				balance = cusEnt?.balance ?? 0;
 				quantity = cusEnt.customer_product.quantity || 1;
-				featureName = cusEnt.customer_product.product.name;
+				featureName = cusEnt.entitlement.feature.name;
+				featureType = cusEnt.entitlement.feature.type;
 			}
+
+			// For credit systems, calculate effective balance from subrows
+			if (!subRowData && featureType === FeatureType.CreditSystem) {
+				const subRows = (cusEnt as any).subRows || [];
+				let totalSpent = 0;
+
+				for (const subRow of subRows) {
+					const meteredCusEnt = subRow.meteredCusEnt;
+					const creditCost = subRow.credit_amount;
+
+					if (meteredCusEnt?.entitlement) {
+						const subEnt = meteredCusEnt.entitlement;
+						if (subEnt.allowance_type !== AllowanceType.Unlimited) {
+							const subTotal =
+								subEnt.allowance * (meteredCusEnt.customer_product.quantity || 1);
+							const subRemaining = meteredCusEnt.balance || 0;
+							const subUsed = subTotal - subRemaining;
+							totalSpent += subUsed * creditCost;
+						}
+					}
+				}
+
+				const total = allowance * quantity;
+				balance = total - totalSpent;
+			}
+
+			const isBoolean = featureType === FeatureType.Boolean;
 
 			return (
 				<div className={cn("flex items-center gap-2.5 py-2", className)}>
-					<CustomerFeatureUsageBar
-						allowance={allowance}
-						balance={balance}
-						quantity={quantity}
-					/>
+					{!isBoolean && (
+						<CustomerFeatureUsageBar
+							allowance={allowance}
+							balance={balance}
+							quantity={quantity}
+						/>
+					)}
 					<span>{featureName}</span>
 				</div>
 			);
@@ -94,6 +132,14 @@ export const CustomerFeatureUsageColumns = [
 		cell: ({ row }: { row: Row<FullCusEntWithFullCusProduct> }) => {
 			const cusEnt = row.original;
 			const subRowData = getSubRowData(cusEnt);
+			let featureType: FeatureType;
+			let allowanceType: AllowanceType;
+			let allowance: number;
+			let balance: number;
+			let quantity: number;
+			let isSubRow: boolean;
+			let creditAmount: number | undefined;
+			let subRows: any[] | undefined;
 
 			if (subRowData) {
 				const { meteredCusEnt, credit_amount } = subRowData;
@@ -102,77 +148,34 @@ export const CustomerFeatureUsageColumns = [
 					return <div className="text-sm text-t3">-</div>;
 				}
 
-				const ent = meteredCusEnt.entitlement;
-
-				if (ent.allowance_type === AllowanceType.Unlimited) {
-					return <div className="text-sm text-t3">Unlimited</div>;
-				}
-
-				const { used } = calculateUsageMetrics({
-					allowance: ent.allowance || 0,
-					balance: meteredCusEnt.balance || 0,
-					quantity: meteredCusEnt.customer_product.quantity || 1,
-				});
-				const spent = used * (credit_amount || 0);
-
-				return (
-					<div className="text-sm flex items-center gap-1">
-						{used} used <PokerChipIcon className="min-w-4" /> {spent} spent
-					</div>
-				);
+				featureType = meteredCusEnt.entitlement.feature.type;
+				allowanceType = meteredCusEnt.entitlement.allowance_type;
+				allowance = meteredCusEnt.entitlement.allowance || 0;
+				balance = meteredCusEnt.balance || 0;
+				quantity = meteredCusEnt.customer_product.quantity || 1;
+				isSubRow = true;
+				creditAmount = credit_amount;
+			} else {
+				featureType = cusEnt.entitlement.feature.type;
+				allowanceType = cusEnt.entitlement.allowance_type;
+				allowance = cusEnt.entitlement.allowance || 0;
+				balance = cusEnt.balance || 0;
+				quantity = cusEnt.customer_product.quantity || 1;
+				isSubRow = false;
+				subRows = (cusEnt as any).subRows;
 			}
-
-			const ent = cusEnt.entitlement;
-
-			if (ent.feature.type === FeatureType.Boolean) {
-				return <></>;
-			}
-
-			if (ent.allowance_type === AllowanceType.Unlimited) {
-				return <div className="text-t3">Unlimited</div>;
-			}
-
-			if (ent.feature.type === FeatureType.CreditSystem) {
-				const subRows = (cusEnt as any).subRows || [];
-				let totalSpent = 0;
-
-				for (const subRow of subRows) {
-					const meteredCusEnt = subRow.meteredCusEnt;
-					const creditCost = subRow.credit_amount;
-
-					if (meteredCusEnt?.entitlement) {
-						const subEnt = meteredCusEnt.entitlement;
-						if (subEnt.allowance_type !== AllowanceType.Unlimited) {
-							const { used } = calculateUsageMetrics({
-								allowance: subEnt.allowance || 0,
-								balance: meteredCusEnt.balance || 0,
-								quantity: meteredCusEnt.customer_product.quantity || 1,
-							});
-							totalSpent += used * creditCost;
-						}
-					}
-				}
-
-				const total =
-					(ent.allowance || 0) * (cusEnt.customer_product.quantity || 1);
-
-				return (
-					<div className="flex items-center gap-1">
-						<PokerChipIcon className="min-w-4" /> {totalSpent}/{total} used
-					</div>
-				);
-			}
-
-			const { total, used } = calculateUsageMetrics({
-				allowance: ent.allowance || 0,
-				balance: cusEnt.balance || 0,
-				quantity: cusEnt.customer_product.quantity || 1,
-			});
 
 			return (
-				<div>
-					{used}/{total} used
-				</div>
+				<CustomerFeatureUsageDisplay
+					featureType={featureType}
+					allowanceType={allowanceType}
+					allowance={allowance}
+					balance={balance}
+					quantity={quantity}
+					isSubRow={isSubRow}
+					creditAmount={creditAmount}
+					subRows={subRows}
+				/>
 			);
 		},
 	},
@@ -182,30 +185,15 @@ export const CustomerFeatureUsageColumns = [
 		cell: ({ row }: { row: Row<FullCusEntWithFullCusProduct> }) => {
 			const cusEnt = row.original;
 			const subRowData = getSubRowData(cusEnt);
+			let resetTimestamp: number | null | undefined;
 
 			if (subRowData) {
-				const { meteredCusEnt } = subRowData;
-
-				if (!meteredCusEnt?.next_reset_at) {
-					return <div className="text-xs text-t3">-</div>;
-				}
-
-				const { date, time } = formatUnixToDateTime(
-					meteredCusEnt.next_reset_at,
-				);
-				return (
-					<div className="text-xs text-t3">
-						{date} {time}
-					</div>
-				);
+				resetTimestamp = subRowData.meteredCusEnt?.next_reset_at;
+			} else {
+				resetTimestamp = cusEnt.next_reset_at;
 			}
 
-			const { date, time } = formatUnixToDateTime(cusEnt.next_reset_at);
-			return (
-				<div className="text-xs text-t3">
-					{date} {time}
-				</div>
-			);
+			return <CustomerFeatureResetDate resetTimestamp={resetTimestamp} />;
 		},
 	},
 	{
@@ -214,23 +202,15 @@ export const CustomerFeatureUsageColumns = [
 		cell: ({ row }: { row: Row<FullCusEntWithFullCusProduct> }) => {
 			const cusEnt = row.original;
 			const subRowData = getSubRowData(cusEnt);
+			let feature: any;
 
-			const feature = subRowData
-				? subRowData.feature
-				: cusEnt.entitlement.feature;
+			if (subRowData) {
+				feature = subRowData.feature;
+			} else {
+				feature = cusEnt.entitlement.feature;
+			}
 
-			if (!feature) return <div>-</div>;
-
-			return (
-				<div>
-					<Tooltip>
-						<TooltipTrigger asChild>
-							<span className="inline-flex">{getFeatureIcon({ feature })}</span>
-						</TooltipTrigger>
-						<TooltipContent>{getFeatureTypeLabel(feature.type)}</TooltipContent>
-					</Tooltip>
-				</div>
-			);
+			return <CustomerFeatureConfiguration feature={feature} />;
 		},
 	},
 	{

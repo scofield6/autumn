@@ -21,7 +21,7 @@ export const CustomerUsageAnalyticsColumns = [
 	{
 		header: "Status",
 		accessorKey: "status",
-		cell: ({ row }: { row: Row<Event> }) => {
+		cell: () => {
 			return (
 				<div className="font-mono">
 					<span className="text-t3">POST </span>
@@ -34,8 +34,11 @@ export const CustomerUsageAnalyticsColumns = [
 		header: "Timestamp",
 		accessorKey: "timestamp",
 		cell: ({ row }: { row: Row<Event> }) => {
-			const event = row.original;
-			const { date, time } = formatUnixToDateTime(event.timestamp);
+			// type is Date but actually comes as a string
+			const dateObj = new Date(row.original.timestamp as unknown as string);
+			const dateAsNumber = dateObj.getTime();
+
+			const { date, time } = formatUnixToDateTime(dateAsNumber);
 			return (
 				<div className="text-xs text-t3">
 					{date} {time}

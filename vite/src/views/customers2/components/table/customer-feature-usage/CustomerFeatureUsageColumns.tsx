@@ -14,8 +14,11 @@ import {
 	TooltipContent,
 	TooltipTrigger,
 } from "@/components/v2/tooltips/Tooltip";
+import { cn } from "@/lib/utils";
 import { formatUnixToDateTime } from "@/utils/formatUtils/formatDateUtils";
 import { getFeatureIcon } from "@/views/products/features/utils/getFeatureIcon";
+import { CustomerFeatureUsageBar } from "./CustomerFeatureUsageBar";
+import { calculateUsageMetrics } from "./calculateUsageMetrics";
 
 const getFeatureTypeLabel = (type: FeatureType): string => {
 	switch (type) {
@@ -30,23 +33,59 @@ const getFeatureTypeLabel = (type: FeatureType): string => {
 	}
 };
 
+interface SubRowData {
+	isSubRow: boolean;
+	meteredCusEnt?: FullCusEntWithFullCusProduct;
+	feature?: any;
+	credit_amount?: number;
+}
+
+const getSubRowData = (cusEnt: any): SubRowData | null => {
+	if (!cusEnt.isSubRow) return null;
+	return {
+		isSubRow: true,
+		meteredCusEnt: cusEnt.meteredCusEnt,
+		feature: cusEnt.feature,
+		credit_amount: cusEnt.credit_amount,
+	};
+};
+
 export const CustomerFeatureUsageColumns = [
 	{
 		header: "Feature",
 		cell: ({ row }: { row: Row<FullCusEntWithFullCusProduct> }) => {
 			const cusEnt = row.original;
-			const isSubRow = (cusEnt as any).isSubRow;
+			const subRowData = getSubRowData(cusEnt);
+			let allowance: number;
+			let balance: number;
+			let quantity: number;
+			let featureName: string;
+			let className: string | undefined;
 
-			if (isSubRow) {
-				const subRowData = cusEnt as any;
-				return (
-					<div className="flex items-center gap-2 pl-4">
-						<span>{subRowData.feature?.name || "Unknown Feature"}</span>
-					</div>
-				);
+			if (subRowData) {
+				const { meteredCusEnt, feature } = subRowData;
+				allowance = cusEnt.entitlement?.allowance ?? 0;
+				balance = meteredCusEnt?.balance ?? 0;
+				quantity = meteredCusEnt?.customer_product.quantity ?? 1;
+				featureName = feature.name;
+				className = "pl-4";
+			} else {
+				allowance = cusEnt.entitlement?.allowance ?? 0;
+				balance = cusEnt?.balance ?? 0;
+				quantity = cusEnt.customer_product.quantity || 1;
+				featureName = cusEnt.customer_product.product.name;
 			}
 
-			return <div>{cusEnt.customer_product.product.name}</div>;
+			return (
+				<div className={cn("flex items-center gap-2.5 py-2", className)}>
+					<CustomerFeatureUsageBar
+						allowance={allowance}
+						balance={balance}
+						quantity={quantity}
+					/>
+					<span>{featureName}</span>
+				</div>
+			);
 		},
 	},
 	{
@@ -54,37 +93,33 @@ export const CustomerFeatureUsageColumns = [
 		accessorKey: "usage",
 		cell: ({ row }: { row: Row<FullCusEntWithFullCusProduct> }) => {
 			const cusEnt = row.original;
-			const isSubRow = (cusEnt as any).isSubRow;
+			const subRowData = getSubRowData(cusEnt);
 
-			if (isSubRow) {
-				const subRowData = cusEnt as any;
-				const creditCost = subRowData.credit_amount;
-				const meteredCusEnt = subRowData.meteredCusEnt;
+			if (subRowData) {
+				const { meteredCusEnt, credit_amount } = subRowData;
 
-				// If we have usage data for this metered feature, display it
-				if (meteredCusEnt && meteredCusEnt.entitlement) {
-					const ent = meteredCusEnt.entitlement;
-
-					if (ent.allowance_type === AllowanceType.Unlimited) {
-						return <div className="text-sm text-t3">Unlimited</div>;
-					}
-
-					const total =
-						(ent.allowance || 0) *
-						(meteredCusEnt.customer_product.quantity || 1);
-					const remaining = meteredCusEnt.balance || 0;
-					const used = total - remaining;
-					const spent = used * creditCost;
-
-					return (
-						<div className="text-sm flex items-center gap-1">
-							{used} used <PokerChipIcon className="min-w-4" /> {spent} spent
-						</div>
-					);
+				if (!meteredCusEnt?.entitlement) {
+					return <div className="text-sm text-t3">-</div>;
 				}
 
-				// Fallback if no usage data available
-				return <div className="text-sm text-t3">-</div>;
+				const ent = meteredCusEnt.entitlement;
+
+				if (ent.allowance_type === AllowanceType.Unlimited) {
+					return <div className="text-sm text-t3">Unlimited</div>;
+				}
+
+				const { used } = calculateUsageMetrics({
+					allowance: ent.allowance || 0,
+					balance: meteredCusEnt.balance || 0,
+					quantity: meteredCusEnt.customer_product.quantity || 1,
+				});
+				const spent = used * (credit_amount || 0);
+
+				return (
+					<div className="text-sm flex items-center gap-1">
+						{used} used <PokerChipIcon className="min-w-4" /> {spent} spent
+					</div>
+				);
 			}
 
 			const ent = cusEnt.entitlement;
@@ -97,13 +132,46 @@ export const CustomerFeatureUsageColumns = [
 				return <div className="text-t3">Unlimited</div>;
 			}
 
-			const total =
-				(ent.allowance || 0) * (cusEnt.customer_product.quantity || 1);
-			const remaining = cusEnt.balance || 0;
+			if (ent.feature.type === FeatureType.CreditSystem) {
+				const subRows = (cusEnt as any).subRows || [];
+				let totalSpent = 0;
+
+				for (const subRow of subRows) {
+					const meteredCusEnt = subRow.meteredCusEnt;
+					const creditCost = subRow.credit_amount;
+
+					if (meteredCusEnt?.entitlement) {
+						const subEnt = meteredCusEnt.entitlement;
+						if (subEnt.allowance_type !== AllowanceType.Unlimited) {
+							const { used } = calculateUsageMetrics({
+								allowance: subEnt.allowance || 0,
+								balance: meteredCusEnt.balance || 0,
+								quantity: meteredCusEnt.customer_product.quantity || 1,
+							});
+							totalSpent += used * creditCost;
+						}
+					}
+				}
+
+				const total =
+					(ent.allowance || 0) * (cusEnt.customer_product.quantity || 1);
+
+				return (
+					<div className="flex items-center gap-1">
+						<PokerChipIcon className="min-w-4" /> {totalSpent}/{total} used
+					</div>
+				);
+			}
+
+			const { total, used } = calculateUsageMetrics({
+				allowance: ent.allowance || 0,
+				balance: cusEnt.balance || 0,
+				quantity: cusEnt.customer_product.quantity || 1,
+			});
 
 			return (
 				<div>
-					{remaining}/{total} used
+					{used}/{total} used
 				</div>
 			);
 		},
@@ -113,25 +181,23 @@ export const CustomerFeatureUsageColumns = [
 		accessorKey: "resets_at",
 		cell: ({ row }: { row: Row<FullCusEntWithFullCusProduct> }) => {
 			const cusEnt = row.original;
-			const isSubRow = (cusEnt as any).isSubRow;
+			const subRowData = getSubRowData(cusEnt);
 
-			if (isSubRow) {
-				const subRowData = cusEnt as any;
-				const meteredCusEnt = subRowData.meteredCusEnt;
+			if (subRowData) {
+				const { meteredCusEnt } = subRowData;
 
-				// If we have the metered feature entitlement, show its reset date
-				if (meteredCusEnt && meteredCusEnt.next_reset_at) {
-					const { date, time } = formatUnixToDateTime(
-						meteredCusEnt.next_reset_at,
-					);
-					return (
-						<div className="text-xs text-t3">
-							{date} {time}
-						</div>
-					);
+				if (!meteredCusEnt?.next_reset_at) {
+					return <div className="text-xs text-t3">-</div>;
 				}
 
-				return <div className="text-xs text-t3">-</div>;
+				const { date, time } = formatUnixToDateTime(
+					meteredCusEnt.next_reset_at,
+				);
+				return (
+					<div className="text-xs text-t3">
+						{date} {time}
+					</div>
+				);
 			}
 
 			const { date, time } = formatUnixToDateTime(cusEnt.next_reset_at);
@@ -147,41 +213,21 @@ export const CustomerFeatureUsageColumns = [
 		accessorKey: "configuration",
 		cell: ({ row }: { row: Row<FullCusEntWithFullCusProduct> }) => {
 			const cusEnt = row.original;
-			const isSubRow = (cusEnt as any).isSubRow;
+			const subRowData = getSubRowData(cusEnt);
 
-			if (isSubRow) {
-				const subRowData = cusEnt as any;
-				const feature = subRowData.feature;
-				if (!feature) return <div>-</div>;
+			const feature = subRowData
+				? subRowData.feature
+				: cusEnt.entitlement.feature;
 
-				return (
-					<div>
-						<Tooltip>
-							<TooltipTrigger asChild>
-								<span className="inline-flex">
-									{getFeatureIcon({ feature })}
-								</span>
-							</TooltipTrigger>
-							<TooltipContent>
-								{getFeatureTypeLabel(feature.type)}
-							</TooltipContent>
-						</Tooltip>
-					</div>
-				);
-			}
+			if (!feature) return <div>-</div>;
 
-			const ent = cusEnt.entitlement;
 			return (
 				<div>
 					<Tooltip>
 						<TooltipTrigger asChild>
-							<span className="inline-flex">
-								{getFeatureIcon({ feature: ent.feature })}
-							</span>
+							<span className="inline-flex">{getFeatureIcon({ feature })}</span>
 						</TooltipTrigger>
-						<TooltipContent>
-							{getFeatureTypeLabel(ent.feature.type)}
-						</TooltipContent>
+						<TooltipContent>{getFeatureTypeLabel(feature.type)}</TooltipContent>
 					</Tooltip>
 				</div>
 			);

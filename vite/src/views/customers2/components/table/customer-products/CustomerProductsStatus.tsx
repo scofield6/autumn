@@ -56,7 +56,7 @@ export const CustomerProductsStatus = ({
 			return (
 				<StatusItem text="Expired">
 					<XIcon
-						className="text-white bg-grey-500 rounded-full p-0.5"
+						className="text-white bg-red-500 rounded-full p-0.5"
 						size={16}
 					/>
 				</StatusItem>

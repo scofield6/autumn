@@ -28,7 +28,7 @@ jobs:
         working-directory: shared
 
       - name: Build server package
-        run: bun run build
+        run: bun run build && bun run build:check
         working-directory: server
 
       - name: Build vite package

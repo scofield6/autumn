@@ -24,7 +24,8 @@ jobs:
         run: bun install --frozen-lockfile
 
       - name: Build shared package
-        run: bun run shared
+        run: bun run build
+        working-directory: shared
 
       - name: Build server package
         run: bun run build

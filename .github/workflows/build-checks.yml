@@ -1,0 +1,76 @@
+name: Build Checks
+
+on:
+  pull_request:
+    branches: [main, staging, develop]
+  push:
+    branches: [main, staging, develop]
+
+jobs:
+  lint-and-typecheck:
+    name: Lint and Type Check
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: latest
+
+      - name: Install dependencies
+        run: bun install --frozen-lockfile
+
+      - name: Build shared package (for type references)
+        run: bun run shared
+
+      - name: Run Biome lint on server
+        run: bunx biome check server/
+
+      - name: Run Biome lint on vite
+        run: bunx biome check vite/
+
+      - name: Run Biome lint on shared
+        run: bunx biome check shared/
+
+      - name: TypeScript check - shared
+        run: tsc --noEmit --skipLibCheck
+        working-directory: shared
+
+      - name: TypeScript check - server
+        run: tsc --noEmit --skipLibCheck
+        working-directory: server
+
+      - name: TypeScript check - vite
+        run: tsc --noEmit --skipLibCheck
+        working-directory: vite
+
+  build:
+    name: Build All Packages
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: latest
+
+      - name: Install dependencies
+        run: bun install --frozen-lockfile
+
+      - name: Build shared package
+        run: bun run shared
+
+      - name: Build server package
+        run: bun run build
+        working-directory: server
+
+      - name: Build vite package
+        run: bun run build
+        working-directory: vite
+

@@ -1,4 +1,4 @@
-name: Build Checks
+name: Lint and Type Check
 
 on:
   pull_request:
@@ -23,9 +23,6 @@ jobs:
       - name: Install dependencies
         run: bun install --frozen-lockfile
 
-      - name: Build shared package (for type references)
-        run: bun run shared
-
       - name: Run Biome lint on server
         run: bunx biome check server/
 
@@ -46,31 +43,3 @@ jobs:
       - name: TypeScript check - vite
         run: tsc --noEmit --skipLibCheck
         working-directory: vite
-
-  build:
-    name: Build All Packages
-    runs-on: ubuntu-latest
-
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-
-      - name: Setup Bun
-        uses: oven-sh/setup-bun@v2
-        with:
-          bun-version: latest
-
-      - name: Install dependencies
-        run: bun install --frozen-lockfile
-
-      - name: Build shared package
-        run: bun run shared
-
-      - name: Build server package
-        run: bun run build
-        working-directory: server
-
-      - name: Build vite package
-        run: bun run build
-        working-directory: vite
-

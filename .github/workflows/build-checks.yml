@@ -2,9 +2,9 @@ name: Build Checks
 
 on:
   pull_request:
-    branches: [main, staging, develop]
+    branches: [main, staging, dev]
   push:
-    branches: [main, staging, develop]
+    branches: [main, staging, dev]
 
 jobs:
   lint-and-typecheck:
